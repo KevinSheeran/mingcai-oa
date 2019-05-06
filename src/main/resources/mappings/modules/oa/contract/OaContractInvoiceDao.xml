@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.contract.OaContractInvoiceDao">
+    
+	<sql id="oaContractInvoiceColumns">
+		a.id AS "id",
+		a.term_id AS "termId",
+		a.contract_id AS "contractId",
+		a.type AS "type",
+		a.tax_point AS "taxPoint",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.contract_type AS "contractType",
+		a.remarks AS "remarks",
+		a.money AS "money",
+		a.company_name as "companyName",
+		a.duty_paragraph as "dutyParagraph",
+		a.del_flag AS "delFlag",
+		a.invoice_date AS "invoiceDate",
+		u.name AS "updateBy.name",
+		u3.name AS "createBy.name",
+		 a.opening_bank as "openingBank",
+		 a.bank_account as "bankAccount"
+	</sql>
+	
+	<sql id="oaContractInvoiceJoins">
+		left join  SYS_USER u
+    		ON u.id = a.update_by
+    	left JOIN SYS_USER u3
+    		ON u3.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="OaContractInvoice">
+		SELECT 
+			<include refid="oaContractInvoiceColumns"/>
+		FROM oa_contract_invoice a
+		<include refid="oaContractInvoiceJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaContractInvoice">
+		SELECT 
+			<include refid="oaContractInvoiceColumns"/>
+		FROM oa_contract_invoice a
+		<include refid="oaContractInvoiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<if test="beginDate != null and beginDate != ''">
+				AND a.invoice_date &gt;= #{beginDate}
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND a.invoice_date &lt;= #{endDate}
+			</if>
+			<if test="contractId != null and contractId != ''">
+				AND a.contract_Id = #{contractId}
+			</if>
+
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="sumMoney" resultType="OaContractInvoice">
+		SELECT
+		sum(a.money) as "total"
+		FROM oa_contract_invoice a
+		<include refid="oaContractInvoiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+			<if test="beginDate != null and beginDate != ''">
+				AND a.invoice_date &gt;= #{beginDate}
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND a.invoice_date &lt;= #{endDate}
+			</if>
+			<if test="contractId != null and contractId != ''">
+				AND a.contract_Id = #{contractId}
+			</if>
+
+		</where>
+	</select>
+	<select id="findAllList" resultType="OaContractInvoice">
+		SELECT 
+			<include refid="oaContractInvoiceColumns"/>
+		FROM oa_contract_invoice a
+		<include refid="oaContractInvoiceJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_contract_invoice(
+			id,
+			contract_id,
+			type,
+			tax_point,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			contract_type,
+			remarks,
+			money,
+			del_flag,
+			invoice_date,
+			duty_paragraph,
+			company_name,
+			bank_account,
+			opening_bank
+		) VALUES (
+			#{id},
+			#{contractId},
+			#{type},
+			#{taxPoint},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{contractType},
+			#{remarks},
+			#{money},
+			#{delFlag},
+			#{invoiceDate},
+			#{dutyParagraph},
+			#{companyName},
+			#{bankAccount},
+			#{openingBank}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_contract_invoice SET 	
+			contract_id = #{contractId},
+			type = #{type},
+			tax_point = #{taxPoint},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			contract_type = #{contractType},
+			remarks = #{remarks},
+			money = #{money},
+			invoice_date = #{invoiceDate},
+			duty_paragraph= #{dutyParagraph},
+			company_name= #{companyName},
+			bank_account = #{bankAccount},
+			opening_bank = #{openingBank}
+
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_contract_invoice SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

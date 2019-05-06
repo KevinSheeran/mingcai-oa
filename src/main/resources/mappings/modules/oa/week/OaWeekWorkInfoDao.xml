@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.week.OaWeekWorkInfoDao">
+    
+	<sql id="oaWeekWorkInfoColumns">
+		a.id AS "id",
+		a.work_id AS "workId",
+		a.title AS "title",
+		a.mon AS "mon",
+		a.tue AS "tue",
+		a.wed AS "wed",
+		a.thu AS "thu",
+		a.fri AS "fri",
+		a.sat AS "sat",
+		a.sun AS "sun",
+		a.opinion AS "opinion",
+		a.followup AS "followup",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaWeekWorkInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="OaWeekWorkInfo">
+		SELECT 
+			<include refid="oaWeekWorkInfoColumns"/>
+		FROM oa_week_work_info a
+		<include refid="oaWeekWorkInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaWeekWorkInfo">
+		SELECT 
+			<include refid="oaWeekWorkInfoColumns"/>
+		FROM oa_week_work_info a
+		<include refid="oaWeekWorkInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaWeekWorkInfo">
+		SELECT 
+			<include refid="oaWeekWorkInfoColumns"/>
+		FROM oa_week_work_info a
+		<include refid="oaWeekWorkInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_week_work_info(
+			id,
+			work_id,
+			title,
+			mon,
+			tue,
+			wed,
+			thu,
+			fri,
+			sat,
+			sun,
+			opinion,
+			followup,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{workId},
+			#{title},
+			#{mon},
+			#{tue},
+			#{wed},
+			#{thu},
+			#{fri},
+			#{sat},
+			#{sun},
+			#{opinion},
+			#{followup},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_week_work_info SET 	
+			work_id = #{workId},
+			title = #{title},
+			mon = #{mon},
+			tue = #{tue},
+			wed = #{wed},
+			thu = #{thu},
+			fri = #{fri},
+			sat = #{sat},
+			sun = #{sun},
+			opinion = #{opinion},
+			followup = #{followup},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_week_work_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

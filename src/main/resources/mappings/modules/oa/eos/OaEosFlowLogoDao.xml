@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosFlowLogoDao">
+    
+	<sql id="oaEosFlowLogoColumns">
+		a.id AS "id",
+		a.item_id AS "itemId",
+		a.user_id AS "user.id",
+		a.status AS "status",
+		a.content AS "content",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.send_status AS "sendStatus",
+		a.send_content AS "sendContent",
+		u3.name AS "user.name"
+	</sql>
+	
+	<sql id="oaEosFlowLogoJoins">
+		LEFT JOIN sys_user u3 ON u3.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="OaEosFlowLogo">
+		SELECT 
+			<include refid="oaEosFlowLogoColumns"/>
+		FROM oa_eos_flow_logo a
+		<include refid="oaEosFlowLogoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaEosFlowLogo">
+		SELECT 
+			<include refid="oaEosFlowLogoColumns"/>
+		FROM oa_eos_flow_logo a
+		<include refid="oaEosFlowLogoJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaEosFlowLogo">
+		SELECT 
+			<include refid="oaEosFlowLogoColumns"/>
+		FROM oa_eos_flow_logo a
+		<include refid="oaEosFlowLogoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_eos_flow_logo(
+			id,
+			item_id,
+			user_id,
+			status,
+			content,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			send_status,
+			send_content
+		) VALUES (
+			#{id},
+			#{itemId},
+			#{user.id},
+			#{status},
+			#{content},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{sendStatus},
+			#{sendContent}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_flow_logo SET 	
+			item_id = #{itemId},
+			user_id = #{user.id},
+			status = #{status},
+			content = #{content},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			send_status = #{sendStatus},
+			send_content = #{sendContent}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM oa_eos_flow_logo
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.OaFinanceEaDetailDao">
+	<insert id="insert">
+		INSERT INTO oa_finance_ea_detail(
+			id,
+			ea_id, 
+			product_id, 
+			category_id, 
+			bill_number, 
+			pay_type, 
+			money, 
+			create_by, 
+			create_date,
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id},
+			#{eaId}, 
+			#{oaProduct.id}, 
+			#{category.id}, 
+			#{billNumber},
+			#{payType}, 
+			#{money}, 
+			#{createBy.id}, 
+			#{createDate},
+			#{updateBy.id}, 
+			#{updateDate},
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_finance_ea_detail SET 
+			<if test="oaProduct.id != null and oaProduct.id !=''">
+			product_id = #{oaProduct.id},
+			</if>
+			<if test="category.id != null and category.id !=''">
+			category_id = #{category.id},
+			</if>
+			<if test="billNumber != null and billNumber !=''">
+			bill_number = #{billNumber},
+			</if>
+			<if test="payType != null and payType !=''">
+			pay_type = #{payType},
+			</if>
+			<if test="money != null and money !=''">
+			money = #{money},
+			</if>
+			<if test="remarks != null and remarks !=''">
+			remarks = #{remarks},
+			</if>
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+		<update id="delete">
+		UPDATE oa_finance_ea_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+</mapper>

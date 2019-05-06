@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.OaFinanceEaDao">
+	
+	<sql id="oaFinanceEaDetailColumns">
+	  e.id,
+	  e.ea_no,
+	  e.proc_ins_id AS proInsId,
+	  e.office_id,
+	  u1.id AS "first_approver.id",
+	  u1.name AS "first_approver.name",
+	  CASE
+	    e.first_approve_status 
+	    WHEN 0 
+	    THEN '未审核' 
+	    WHEN 1 
+	    THEN '审核处理中' 
+	    WHEN 2 
+	    THEN '审核通过' 
+	    WHEN 3 
+	    THEN '审核未通过' 
+	  END AS first_approve_status,
+	  u2.id AS "second_approver.id",
+	  u2.name AS "second_approver.name",
+	  CASE
+	    e.second_approve_status 
+	    WHEN 0 
+	    THEN '未审核' 
+	    WHEN 1 
+	    THEN '审核处理中' 
+	    WHEN 2 
+	    THEN '审核通过' 
+	    WHEN 3 
+	    THEN '审核未通过' 
+	  END AS second_approve_status,
+	  u3.id AS "third_approver.id",
+	  u3.name AS "third_approver.name",
+	  CASE
+	    e.third_approve_status 
+	    WHEN 0 
+	    THEN '未审核' 
+	    WHEN 1 
+	    THEN '审核处理中' 
+	    WHEN 2 
+	    THEN '审核通过' 
+	    WHEN 3 
+	    THEN '审核未通过' 
+	  END AS third_approve_status,
+	  e.status,
+	  u.id AS "createBy.id",
+	  u.name AS "createBy.name",
+	  d.id AS "detailList.id",
+	  d.ea_id,
+	  o.id AS "office.id",
+	  o.name AS "office.name",
+	  p.id AS "oaProduct.id",
+	  p.name AS "oaProduct.name",
+	  c.id AS "category.id",
+	  c.name AS "category.name",
+	  d.ea_id,
+	  d.bill_number,
+	  d.pay_type,
+	  d.money / 100 AS money,
+	  d.remarks,
+	  e.create_date,
+	  e.update_by AS "updateBy.id",
+	  e.update_date,
+	  e.remarks AS leaderRemark,
+	  e.del_flag
+	</sql>
+	
+	
+	<sql id="oaFinanceEaJoins">
+		JOIN OA_FINANCE_EA_DETAIL d 
+    		ON d.ea_id = e.id 
+  		JOIN SYS_USER u 
+    		ON u.id = e.create_by 
+  		JOIN SYS_OFFICE o 
+    		ON o.id = e.office_id
+    </sql>
+    
+	<sql id="oaFinanceEaDetailJoins">
+		JOIN OA_FINANCE_EA_DETAIL d 
+		    ON d.ea_id = e.id 
+		JOIN SYS_USER u 
+		    ON u.id = e.create_by 
+		JOIN SYS_USER u1 
+		    ON u1.id = e.first_approver 
+		JOIN SYS_USER u2 
+		    ON u2.id = e.second_approver 
+		JOIN SYS_USER u3 
+		    ON u3.id = e.third_approver 
+		JOIN SYS_OFFICE o 
+		    ON o.id = e.office_id 
+		JOIN OA_FINANCE_CATEGORY c 
+		    ON c.id = d.category_id 
+		JOIN OA_FINANCE_PRODUCT p 
+		    ON p.id = d.product_id 
+    </sql>
+    
+    <resultMap type="OaFinanceEa" id="OaFinanceEaMap">  
+	    <id property="id" column="id"/> 
+	    <result property="eaNo" column="ea_no" />
+	    <result property="proInsId" column="proInsId" /> 
+	    <result property="office.id" column="office.id" />
+	    <result property="office.name" column="office.name" />
+	    <result property="userFirstApprover.id" column="first_approver.id"/>
+	    <result property="userFirstApprover.name" column="first_approver.name"/>  
+	    <result property="firstApproveStatus" column="first_approve_status"/>
+	    <result property="userSecondApprover.id" column="second_approver.id"/>
+	    <result property="userSecondApprover.name" column="second_approver.name"/>  
+	    <result property="secondApproveStatus" column="second_approve_status"/>
+	    <result property="userThirdApprover.id" column="third_approver.id"/>
+	    <result property="userThirdApprover.name" column="third_approver.name"/>  
+	    <result property="thirdApproveStatus" column="third_approve_status"/>
+	    <result property="status" column="status"/>  
+	    <result property="thirdApproveStatus" column="third_approve_status"/>
+	    <result property="createBy.id" column="createBy.id"/>
+	    <result property="createBy.name" column="createBy.name"/>
+	    <result property="createDate" column="create_date"/>
+	    <collection property="detailList" ofType="OaFinanceEaDetail" >  
+	       <id property="id" column="detailList.id"/>
+	       <result property="eaId" column="ea_id"/>  
+	       <result property="oaProduct.id" column="oaProduct.id"/>  
+	       <result property="oaProduct.name" column="oaProduct.name"/>  
+	       <result property="category.id" column="category.id"/>  
+	       <result property="category.name" column="category.name"/>  
+	       <result property="billNumber" column="bill_number"/>  
+	       <result property="payType" column="pay_type"/>
+	       <result property="money" column="money"/>
+	       <result property="remarks" column="remarks"/> 
+	    </collection>
+   </resultMap> 
+    
+    
+    <select id="get" resultMap="OaFinanceEaMap">
+		SELECT 
+			<include refid="oaFinanceEaDetailColumns"/>
+		FROM oa_finance_ea e
+		<include refid="oaFinanceEaDetailJoins"/>
+		WHERE e.id = #{id}
+		AND d.del_flag = '0'
+		AND e.del_flag = '0'
+	</select>
+	
+	<!-- 获取报销单列表 -->
+	<select id="findList" resultType="OaFinanceEa">
+		SELECT 
+		  e2.id,
+		  e2.ea_no,
+		  e2.proInsId,
+		  e2.status,
+		  e2.moneys,
+		  e2.create_date,
+		  e2.update_by AS "updateBy.id",
+		  e2.update_date,
+		  e2.leaderRemark,
+		  e2.del_flag,
+		  o.name AS "office.name",
+		  u.id AS "createBy.id",
+		  u.name AS "createBy.name" 
+		FROM
+		  (SELECT 
+		    e.id,
+		    e.ea_no,
+		    e.proc_ins_id AS proInsId,
+		    SUM(d.money) / 100 AS moneys,
+		    CASE
+		      e.status 
+		      WHEN 0 
+		      THEN '未审核' 
+		      WHEN 1 
+		      THEN '审核处理中' 
+		      WHEN 2 
+		      THEN '已出纳' 
+		      WHEN 3 
+		      THEN '已撤销' 
+		    END AS STATUS,
+		    e.create_date,
+		    e.update_by,
+		    e.update_date,
+		    e.remarks AS leaderRemark,
+		    e.del_flag,
+		    e.create_by,
+		    e.office_id 
+		  FROM
+		    oa_finance_ea e 
+		    JOIN OA_FINANCE_EA_DETAIL d 
+		      ON d.ea_id = e.id 
+		  WHERE e.del_flag = #{DEL_FLAG_NORMAL}
+		  AND d.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="!accessAble">
+			AND e.create_by = #{createBy.id}
+		</if>
+		GROUP BY d.ea_id) AS e2 
+		  JOIN SYS_USER u 
+		    ON u.id = e2.create_by 
+		  JOIN SYS_OFFICE o 
+		    ON o.id = e2.office_id 
+		ORDER BY e2.update_date DESC
+	</select>
+
+	<!-- 获取报销单列表 -->
+	<select id="findMoneyById" resultType="BigDecimal">
+		SELECT
+		SUM(d.money) / 100 AS moneys
+		FROM
+		oa_finance_ea e
+		JOIN OA_FINANCE_EA_DETAIL d
+		ON d.ea_id = e.id
+		WHERE d.ea_id = #{eaId}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_finance_ea(
+			id,
+			ea_no, 
+			proc_ins_id, 
+			office_id,
+			first_approver, 
+			first_approve_status, 
+			second_approver, 
+			second_approve_status,
+			third_approver, 
+			third_approve_status, 
+			status,
+			create_by, 
+			create_date,
+			update_by, 
+			update_date,
+			remarks, 
+			del_flag
+		) VALUES (
+			#{id},
+			#{eaNo}, 
+			#{procInsId}, 
+			#{office.id},
+			#{userFirstApprover.id}, 
+			#{firstApproveStatus}, 
+			#{userSecondApprover.id}, 
+			#{secondApproveStatus},
+			#{userThirdApprover.id}, 
+			#{thirdApproveStatus},
+			#{status}, 
+			#{createBy.id}, 
+			#{createDate},
+			#{updateBy.id}, 
+			#{updateDate},
+			#{remarks}, 
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_finance_ea SET 
+			<if test="userFirstApprover.id != null and userFirstApprover.id!=''">
+			first_approver = #{userFirstApprover.id},
+			</if>
+			<if test="userSecondApprover.id != null and userSecondApprover.id!=''">
+			second_approver = #{userSecondApprover.id},
+			</if>
+			<if test="userThirdApprover.id != null and userThirdApprover.id!=''">
+			third_approver = #{userThirdApprover.id},
+			</if>
+			first_approve_status = #{firstApproveStatus},
+			second_approve_status = #{secondApproveStatus},
+			third_approve_status = #{thirdApproveStatus},
+			status = #{status}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateApproverStatus">
+		UPDATE oa_finance_ea SET 
+			id = #{param5}
+		<if test="param1 != null">
+			,first_approve_status = #{param1}
+		</if>
+		<if test="param2 != null">
+			,second_approve_status = #{param2}
+		</if>
+		<if test="param3 != null">
+			,third_approve_status = #{param3}
+		</if>
+		<if test="param4 != null">
+			,status = #{param4}
+		</if>
+		WHERE id = #{param5}
+	</update>
+	
+	<delete id="deleteInactivationEx">
+		DELETE FROM act_ru_execution 
+		WHERE PROC_INST_ID_ = #{processInstanceId} 
+		AND IS_ACTIVE_ = 0
+		AND PARENT_ID_ IS NOT NULL
+		
+	</delete>
+	
+</mapper>

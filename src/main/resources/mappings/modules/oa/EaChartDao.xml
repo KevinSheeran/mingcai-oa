@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.EaChartDao">
+
+	<select id="getChartByProType1" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		p.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		GROUP BY
+		p.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByCateType1" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		c.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_category c
+		ON a.category_id = c.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		GROUP BY
+		c.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByDepartType1" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		o.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		GROUP BY
+		o.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByYearType1" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		GROUP BY
+		YEAR(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByMonthType1" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年%m月') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		GROUP BY
+		MONTH(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByDayType1" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年%m月%d号') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		GROUP BY
+		DAY(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByCateType2" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		c.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		LEFT JOIN oa_finance_category c
+		ON a.category_id = c.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND a.product_id = #{project}
+		GROUP BY
+		p.id,
+		c.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByDepartType2" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		o.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND a.product_id = #{project}
+		GROUP BY
+		p.id,
+		o.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByStaffType2" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		u.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND a.product_id = #{project}
+		GROUP BY
+		p.id,
+		u.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByYearType2" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND a.product_id = #{project}
+		GROUP BY
+		p.id,
+		YEAR(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByMonthType2" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年%m月') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND a.product_id = #{project}
+		GROUP BY
+		p.id,
+		MONTH(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByDayType2" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年%m月%d号') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND a.product_id = #{project}
+		GROUP BY
+		p.id,
+		DAY(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByProType3" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		p.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND o.id = #{depart}
+		GROUP BY
+		o.id,
+		p.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByCateType3" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		c.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		LEFT JOIN oa_finance_category c
+		ON a.category_id = c.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND o.id = #{depart}
+		GROUP BY
+		o.id,
+		c.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByStaffType3" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		u.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND o.id = #{depart}
+		GROUP BY
+		o.id,
+		u.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByYearType3" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND o.id = #{depart}
+		GROUP BY
+		o.id,
+		YEAR(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByMonthType3" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年%m月') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND o.id = #{depart}
+		GROUP BY
+		o.id,
+		MONTH(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByDayType3" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年%m月%d号') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND o.id = #{depart}
+		GROUP BY
+		o.id,
+		DAY(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByProType4" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		p.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND u.id = #{staff}
+		GROUP BY
+		u.id,
+		p.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByCateType4" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		c.name AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN oa_finance_category c
+		ON a.category_id = c.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND u.id = #{staff}
+		GROUP BY
+		u.id,
+		c.id
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByYearType4" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND u.id = #{staff}
+		GROUP BY
+		u.id,
+		YEAR(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByMonthType4" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年%m月') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND u.id = #{staff}
+		GROUP BY
+		u.id,
+		MONTH(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getChartByDayType4" resultType="java.util.Map" parameterType="EaData">
+		SELECT
+		DATE_FORMAT(a.create_date,'%Y年%m月%d号') AS name,
+		TRUNCATE(SUM(a.money)/100,1) AS value
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		WHERE a.del_flag = '0'
+		AND a.create_date <![CDATA[>=]]> #{beginDate}
+		AND a.create_date <![CDATA[<=]]> #{endDate}
+		AND u.id = #{staff}
+		GROUP BY
+		u.id,
+		DAY(a.create_date)
+		<if test="order==null || order==0">
+			ORDER BY name ASC
+		</if>
+		<if test="order!=null and order==1">
+			ORDER BY value ASC
+		</if>
+		<if test="order!=null and order==2">
+			ORDER BY value DESC
+		</if>
+		<if test="limitNum!=null and limitNum!=0">
+			LIMIT #{limitNum,jdbcType=INTEGER}
+		</if>
+	</select>
+
+	<select id="getProList" resultType="java.util.Map">
+		SELECT
+		p.name AS name,
+		p.id AS id
+		FROM oa_finance_ea_detail a
+		LEFT JOIN oa_finance_product p
+		ON a.product_id = p.id
+		WHERE a.del_flag = '0'
+		GROUP BY
+		p.id
+	</select>
+	<select id="getDepartList" resultType="com.mingcai.edu.modules.sys.entity.Office">
+		SELECT
+		o.name AS name,
+		o.id AS id
+		FROM oa_finance_ea_detail a
+		LEFT JOIN sys_user u
+		ON a.create_by = u.id
+		LEFT JOIN sys_office o
+		ON u.office_id = o.id
+		WHERE a.del_flag = '0'
+		GROUP BY
+		o.id
+	</select>
+
+	<select id="getStaffList" resultType="com.mingcai.edu.modules.sys.entity.User" parameterType="String">
+		SELECT
+		u.name AS name,
+		u.id AS id
+		FROM sys_user u
+		WHERE u.del_flag = '0'
+		AND u.office_id = #{param}
+	</select>
+
+</mapper>

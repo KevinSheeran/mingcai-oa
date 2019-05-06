@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.contract.OaContractTermsDao">
+    
+	<sql id="oaContractTermsColumns">
+		a.id AS "id",
+		a.contract_id AS "contractId",
+		a.number AS "number",
+		a.unit_price AS "unitPrice",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.name AS "name",
+		a.unit AS "unit",
+		a.specifications AS "specifications",
+		a.type AS "type",
+		a.code as "code",
+		a.indexs as "indexs"
+	</sql>
+	
+	<sql id="oaContractTermsJoins">
+		left join oa_contract_info c on c.id=a.contract_id
+	</sql>
+    
+	<select id="get" resultType="OaContractTerms">
+		SELECT 
+			<include refid="oaContractTermsColumns"/>
+		FROM oa_contract_terms a
+		<include refid="oaContractTermsJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getLast" resultType="OaContractTerms">
+		SELECT
+		<include refid="oaContractTermsColumns"/>
+		FROM oa_contract_terms a
+		<include refid="oaContractTermsJoins"/>
+		where a.contract_id= #{contractId}
+		order by a.indexs  desc limit 0,1
+	</select>
+	<select id="sumPrice" resultType="OaContractTerms">
+		SELECT
+		sum(a.number*unit_price) as "sumPrice"
+		FROM oa_contract_terms a
+		<where>
+		a.del_flag = #{DEL_FLAG_NORMAL}
+		and a.contract_id =#{contractId}
+		</where>
+	</select>
+	<select id="findList" resultType="OaContractTerms">
+		SELECT 
+			<include refid="oaContractTermsColumns"/>
+		FROM oa_contract_terms a
+		<include refid="oaContractTermsJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and (a.contract_id =#{contractId} or c.fin_product_id= #{contractId})
+			<if test="name != null and name != ''">
+				AND a.name LIKE
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				order by a.id DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaContractTerms">
+		SELECT 
+			<include refid="oaContractTermsColumns"/>
+		FROM oa_contract_terms a
+		<include refid="oaContractTermsJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and (a.contract_id =#{contractId} or c.fin_product_id= #{contractId})
+		</where>		
+		order by a.id asc
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_contract_terms(
+			contract_id,
+			number,
+			unit_price,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			name,
+			unit,
+			specifications,
+			type,
+		    code,
+		    indexs
+		) VALUES (
+			#{contractId},
+			#{number},
+			#{unitPrice},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{name},
+			#{unit},
+			#{specifications},
+			#{type},
+			#{code},
+			#{indexs}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_contract_terms SET 	
+			contract_id = #{contractId},
+			number = #{number},
+			unit_price = #{unitPrice},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			name = #{name},
+			unit = #{unit},
+			specifications = #{specifications},
+			type = #{type},
+			indexs = #{indexs}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_contract_terms SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

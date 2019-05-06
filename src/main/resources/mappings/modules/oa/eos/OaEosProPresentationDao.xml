@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosProPresentationDao">
+    
+	<sql id="oaEosProPresentationColumns">
+		a.id AS "id",
+		a.eos_id AS "eosId",
+		a.summary AS "summary",
+		a.next_plan AS "nextPlan",
+		a.problem_handle AS "problemHandle",
+		a.proposal AS "proposal",
+		a.start_end AS "startEnd",
+		a.create_by AS "createBy.id",
+		b.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		c.pro_number as "pro.proNumber",
+		c.name as "pro.name"
+	</sql>
+	
+	<sql id="oaEosProPresentationJoins">
+        LEFT JOIN sys_user b ON b.id = a.create_by
+        Left join oa_eos_pro c on c.id=a.eos_id
+	</sql>
+    
+	<select id="get" resultType="OaEosProPresentation">
+		SELECT 
+			<include refid="oaEosProPresentationColumns"/>
+		FROM oa_eos_pro_presentation a
+		<include refid="oaEosProPresentationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getByDate" resultType="OaEosProPresentation">
+		SELECT
+		<include refid="oaEosProPresentationColumns"/>
+		FROM oa_eos_pro_presentation a
+		<include refid="oaEosProPresentationJoins"/>
+		WHERE a.start_end = #{startEnd} and a.create_by=#{createBy.id} and a.eos_id = #{eosId}
+	</select>
+    <select id="getListAllByDate" resultType="OaEosProPresentation">
+        SELECT
+        <include refid="oaEosProPresentationColumns"/>
+        FROM oa_eos_pro_presentation a
+        <include refid="oaEosProPresentationJoins"/>
+        WHERE a.start_end = #{startEnd}
+    </select>
+	<select id="findList" resultType="OaEosProPresentation">
+		SELECT 
+			<include refid="oaEosProPresentationColumns"/>
+		FROM oa_eos_pro_presentation a
+		<include refid="oaEosProPresentationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.eos_id=#{eosId}
+			<if test="uername!=null and uername!=''">
+				AND b.name LIKE concat('%',#{uername},'%')
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaEosProPresentation">
+		SELECT 
+			<include refid="oaEosProPresentationColumns"/>
+		FROM oa_eos_pro_presentation a
+		<include refid="oaEosProPresentationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_eos_pro_presentation(
+			id,
+			eos_id,
+			summary,
+			next_plan,
+			problem_handle,
+			proposal,
+			start_end,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{eosId},
+			#{summary},
+			#{nextPlan},
+			#{problemHandle},
+			#{proposal},
+			#{startEnd},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_pro_presentation SET 	
+			eos_id = #{eosId},
+			summary = #{summary},
+			next_plan = #{nextPlan},
+			problem_handle = #{problemHandle},
+			proposal = #{proposal},
+			start_end = #{startEnd},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_eos_pro_presentation SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

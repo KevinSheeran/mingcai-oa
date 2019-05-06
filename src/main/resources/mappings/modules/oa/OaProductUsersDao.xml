@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.OaProductUsersDao">
+    
+	<sql id="oaProductUsersColumns">
+		a.product_id AS "productId",
+		a.user_id AS "user.id",
+		u3.name AS "user.name",
+		u3.photo as "user.photo",
+    	o.name AS "user.office.name"
+	</sql>
+	
+	<sql id="oaProductUsersJoins">
+		LEFT JOIN sys_user u3 ON u3.id = a.user_id
+		LEFT JOIN sys_office o ON o.id = u3.office_id
+	</sql>
+    
+	<select id="get" resultType="OaProductUsers">
+		SELECT 
+			<include refid="oaProductUsersColumns"/>
+		FROM oa_product_users a
+		<include refid="oaProductUsersJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaProductUsers">
+		SELECT 
+			<include refid="oaProductUsersColumns"/>
+		FROM oa_product_users a
+		<include refid="oaProductUsersJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findListByproductId" resultType="OaProductUsers">
+		SELECT
+		<include refid="oaProductUsersColumns"/>
+		FROM oa_product_users a
+		<include refid="oaProductUsersJoins"/>
+		<where>
+			a.product_id = #{productId}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="OaProductUsers">
+		SELECT 
+			<include refid="oaProductUsersColumns"/>
+		FROM oa_product_users a
+		<include refid="oaProductUsersJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	<!--统计项目人数 -->
+	<select id="countProductId" resultType="OaProductUsers">
+		SELECT
+		count(*) AS "userCount"
+		FROM oa_product_users a
+		<where>
+			a.product_id=#{productId}
+		</where>
+
+	</select>
+	<insert id="insert">
+		INSERT INTO oa_product_users(
+			product_id,
+			user_id
+		) VALUES (
+			#{productId},
+			#{user.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_product_users SET 	
+			product_id = #{productId},
+			user_id = #{user.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM oa_product_users
+		WHERE product_id = #{productId}
+	</update>
+	
+</mapper>

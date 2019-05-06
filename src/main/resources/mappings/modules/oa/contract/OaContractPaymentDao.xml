@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.contract.OaContractPaymentDao">
+    
+	<sql id="oaContractPaymentColumns">
+		a.id AS "id",
+		a.contract_id AS "contractId",
+		a.money AS "money",
+		a.batch_id AS "batchId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.payment_date as "paymentDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.contract_type AS "contractType",
+		u.name AS "updateBy.name",
+		u3.name AS "createBy.name",
+		a.proportion as "proportion",
+		a.status as "status"
+	</sql>
+	
+	<sql id="oaContractPaymentJoins">
+		left join  SYS_USER u
+    		ON u.id = a.update_by
+    	left JOIN SYS_USER u3
+    		ON u3.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="OaContractPayment">
+		SELECT 
+			<include refid="oaContractPaymentColumns"/>
+		FROM oa_contract_payment a
+		<include refid="oaContractPaymentJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaContractPayment">
+		SELECT 
+			<include refid="oaContractPaymentColumns"/>
+		FROM oa_contract_payment a
+		<include refid="oaContractPaymentJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaContractPayment">
+		SELECT 
+			<include refid="oaContractPaymentColumns"/>
+		FROM oa_contract_payment a
+		<include refid="oaContractPaymentJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.contract_id =#{contractId}
+
+		</where>		
+				ORDER BY a.batch_id DESC
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_contract_payment(
+			id,
+			contract_id,
+			money,
+			batch_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			contract_type,
+			payment_date,
+			proportion,
+			status
+		) VALUES (
+			#{id},
+			#{contractId},
+			#{money},
+			#{batchId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{contractType},
+			#{paymentDate},
+			#{proportion},
+			#{status}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_contract_payment SET 	
+			contract_id = #{contractId},
+			money = #{money},
+			batch_id = #{batchId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			contract_type = #{contractType},
+			payment_date =#{paymentDate},
+			proportion = #{proportion},
+			status = #{status}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_contract_payment SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

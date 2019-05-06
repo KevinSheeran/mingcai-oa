@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.user.OaUserAccountDao">
+    
+	<sql id="oaUserAccountColumns">
+		a.id AS "id",
+		a.sales_volume_id AS "salesVolumeId.id",
+		osv.sales_volume/100 AS "salesVolumeId.salesVolume",
+		osv.remarks AS "salesVolumeId.remarks",
+		osv.uotaRatio AS "salesVolumeId.uotaRatio",
+		a.branch_quota/100 AS "branchQuota",
+		a.pool_funds/100 AS "poolFunds",
+		a.cost_incurred/100 AS "costIncurred",
+		a.spare_a/100 AS "spareA",
+		a.spare_b/100 AS "spareB",
+		a.spare_c/100 AS "spareC",
+		a.string_a AS "stringA",
+		a.string_b AS "stringB",
+		a.string_c AS "stringC",
+		a.flag AS "flag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.flow_id as "flowId",
+		a.status as "status",
+		a.begin_end_month as "beginEndMonth",
+		u.name as "user.name",
+		owu.userid as "wxUsers.userid",
+		owu.name as "wxUsers.name",
+		owu.mobile as "wxUsers.mobile",
+		owu.department as "wxUsers.department_s",
+		owu.position as "wxUsers.position",
+		owu.email as "wxUsers.email",
+		owu.avatar as "wxUsers.avatar",
+		owu.qr_code as "wxUsers.qr_code"
+	</sql>
+	
+	<sql id="oaUserAccountJoins">
+		LEFT JOIN sys_user u ON u.id = a.id
+		LEFT JOIN oa_wx_users owu ON owu.mobile = u.mobile
+		left join oa_user_sales_volume  osv on osv.id=a.sales_volume_id
+	</sql>
+    
+	<select id="get" resultType="OaUserAccount">
+		SELECT 
+			<include refid="oaUserAccountColumns"/>
+		FROM oa_user_account a
+		<include refid="oaUserAccountJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getBySales" resultType="OaUserAccount">
+		SELECT
+		<include refid="oaUserAccountColumns"/>
+		FROM oa_user_account a
+		<include refid="oaUserAccountJoins"/>
+		WHERE a.sales_volume_id = #{salesVolumeId.id}
+	</select>
+
+	<select id="findListByUser" resultType="OaUserAccount">
+		SELECT
+		<include refid="oaUserAccountColumns"/>,
+		flow.create_date as "flow.createDate"
+		FROM oa_user_account a
+		<include refid="oaUserAccountJoins"/>
+		RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND flow.user_id=#{userId} and a.status=1 and flow.status=0
+		</where>
+		group by a.id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListByFlowFinishUser" resultType="OaUserAccount">
+		SELECT
+		<include refid="oaUserAccountColumns"/>,
+		flow.create_date as "flow.createDate"
+		FROM oa_user_account a
+		<include refid="oaUserAccountJoins"/>
+		LEFT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND flow.user_id=#{userId}  and (flow.status=1 or flow.status=-1)
+		</where>
+		group by a.id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY flow.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findList" resultType="OaUserAccount">
+		SELECT 
+			<include refid="oaUserAccountColumns"/>
+		FROM oa_user_account a
+		<include refid="oaUserAccountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaUserAccount">
+		SELECT 
+			<include refid="oaUserAccountColumns"/>
+		FROM oa_user_account a
+		<include refid="oaUserAccountJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_user_account(
+			id,
+			sales_volume_id,
+			branch_quota,
+			pool_funds,
+			cost_incurred,
+			spare_a,
+			spare_b,
+			spare_c,
+			string_a,
+			string_b,
+			string_c,
+			flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			flow_id ,
+			status,
+			begin_end_month
+		) VALUES (
+			#{id},
+			#{salesVolumeId.id},
+			#{branchQuota}*100,
+			#{poolFunds}*100,
+			#{costIncurred}*100,
+			#{spareA}*100,
+			#{spareB}*100,
+			#{spareC}*100,
+			#{stringA},
+			#{stringB},
+			#{stringC},
+			#{flag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{flowId},
+			#{status},
+			#{beginEndMonth}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_user_account SET 	
+			sales_volume_id = #{salesVolumeId.id},
+			branch_quota = #{branchQuota}*100,
+			pool_funds = #{poolFunds}*100,
+			cost_incurred = #{costIncurred}*100,
+			spare_a = #{spareA}*100,
+			spare_b = #{spareB}*100,
+			spare_c = #{spareC}*100,
+			string_a = #{stringA},
+			string_b = #{stringB},
+			string_c = #{stringC},
+			flag = #{flag},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			flow_id= #{flowId},
+			status = #{status},
+			begin_end_month = #{beginEndMonth}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_user_account SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

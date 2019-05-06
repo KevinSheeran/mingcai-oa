@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.contract.OaContractPurchaseInfoDao">
+    
+	<sql id="oaContractPurchaseInfoColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.product_name AS "productName",
+		a.contacts AS "contacts",
+		a.contact_number AS "contactNumber",
+		a.bank_account AS "bankAccount",
+		a.duty_paragraph AS "dutyParagraph",
+		u4.name as "userName",
+		a.time_node AS "timeNode",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.status AS "status",
+		a.fin_product_id AS "finProductId",
+		a.term_id AS "termId",
+		a.supplierId as "supplierId",
+		a.opening_bank as "openingBank"
+	</sql>
+	
+	<sql id="oaContractPurchaseInfoJoins">
+		LEFT JOIN sys_user u4 ON u4.id = a.contacts
+	</sql>
+    
+	<select id="get" resultType="OaContractPurchaseInfo">
+		SELECT 
+			<include refid="oaContractPurchaseInfoColumns"/>
+		FROM oa_contract_purchase_info a
+		<include refid="oaContractPurchaseInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="findList" resultType="OaContractPurchaseInfo">
+		SELECT 
+			<include refid="oaContractPurchaseInfoColumns"/>
+		FROM oa_contract_purchase_info a
+		<include refid="oaContractPurchaseInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.fin_product_id=#{finProductId}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaContractPurchaseInfo">
+		SELECT 
+			<include refid="oaContractPurchaseInfoColumns"/>
+		FROM oa_contract_purchase_info a
+		<include refid="oaContractPurchaseInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_contract_purchase_info(
+			id,
+			name,
+			product_name,
+			contacts,
+			contact_number,
+			bank_account,
+			duty_paragraph,
+			time_node,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			status,
+			fin_product_id,
+			term_id,
+			supplierId,
+			opening_bank
+		) VALUES (
+			#{id},
+			#{name},
+			#{productName},
+			#{contacts},
+			#{contactNumber},
+			#{bankAccount},
+			#{dutyParagraph},
+			#{timeNode},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{status},
+			#{finProductId},
+			#{termId},
+			#{supplierId},
+			#{openingBank}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_contract_purchase_info SET 	
+			name = #{name},
+			product_name = #{productName},
+			contacts = #{contacts},
+			contact_number = #{contactNumber},
+			bank_account = #{bankAccount},
+			duty_paragraph = #{dutyParagraph},
+			time_node = #{timeNode},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			status = #{status},
+			fin_product_id = #{finProductId},
+			term_id = #{termId},
+			supplierId = #{supplierId},
+			opening_bank = #{openingBank}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_contract_purchase_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

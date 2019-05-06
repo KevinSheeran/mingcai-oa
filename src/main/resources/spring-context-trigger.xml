@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans>
+	<!-- 启动采集 -->
+	<bean id="Server" class="com.mingcai.edu.common.utils.weixinApi.GlobalService">
+	</bean>
+	<bean id="account" class="com.mingcai.edu.modules.oa.utils.AccountService">
+	</bean>
+	<bean id="accountFactory" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="account" />
+		</property>
+		<property name="targetMethod">
+			<value>InitData</value>
+		</property>
+	</bean>
+	<bean id="serverFactory" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="Server" />
+		</property>
+		<property name="targetMethod">
+		       <value>InitGloabal</value>
+		</property>
+	</bean>
+	<bean id="serverSynTime" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<ref bean="serverFactory" />
+		</property>
+		<property name="startDelay" value="10000" />
+        <property name="repeatInterval" value="700000" />
+        <!--<property name="repeatCount" value="0" />-->
+    </bean>
+	<bean id="accountServerSynTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail">
+			<ref bean="accountFactory" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0 0 1 * ?</value>
+			<!--每隔一分钟执行一次 -->
+			<!--<value>0 */1 * * * ?</value>-->
+			<!--每隔1秒执行一次 -->
+			<!--<value>*/1 * * * * ?</value>-->
+		</property>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="serverSynTime"/>
+				<ref local="accountServerSynTime"/>
+		   </list>
+		</property>
+	</bean>
+</beans>

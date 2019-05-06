@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaWxExtendedDao">
+
+    <sql id="oaWxExtendedColumns">
+		a.id AS "id",
+	a.cost/100 AS "cost",
+	a.state AS "state",
+	a.content AS "content",
+	a.pro_id AS "proId",
+	a.exte_super AS "oaWxExtendedSuper.id",
+	a.create_by AS "createBy.id",
+	a.create_date AS "createDate",
+	a.update_by AS "updateBy.id",
+	a.update_date AS "updateDate",
+	a.remarks AS "remarks",
+	a.del_flag AS "delFlag",
+	a.settlement as "settlement"
+</sql>
+
+
+    <sql id="oaWxExtendedJoins">
+    </sql>
+
+    <select id="get" resultType="OaWxExtended">
+        SELECT
+        <include refid="oaWxExtendedColumns"/>
+        FROM oa_wx_extended a
+        <include refid="oaWxExtendedJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="OaWxExtended">
+        SELECT
+        <include refid="oaWxExtendedColumns"/>
+        FROM oa_wx_extended a
+        <include refid="oaWxExtendedJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="cost != null and cost != ''">
+                AND a.cost = #{cost}
+            </if>
+            <if test="state != null and state != ''">
+                AND a.state LIKE
+                <if test="dbName == 'oracle'">'%'||#{state}||'%'</if>
+                <if test="dbName == 'mssql'">'%'+#{state}+'%'</if>
+                <if test="dbName == 'mysql'">concat('%',#{state},'%')</if>
+            </if>
+            <if test="content != null and content != ''">
+                AND a.content LIKE
+                <if test="dbName == 'oracle'">'%'||#{content}||'%'</if>
+                <if test="dbName == 'mssql'">'%'+#{content}+'%'</if>
+                <if test="dbName == 'mysql'">concat('%',#{content},'%')</if>
+            </if>
+            AND create_by=#{createBy.id}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+
+            </when>
+            <otherwise>
+                ORDER BY a.create_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="OaWxExtended">
+        SELECT
+        <include refid="oaWxExtendedColumns"/>
+        FROM oa_wx_extended a
+        <include refid="oaWxExtendedJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+
+    <insert id="insert">
+		INSERT INTO oa_wx_extended(
+			id,
+			cost,
+			state,
+			content,
+			 pro_id,
+			exte_super,
+			create_by,
+			create_date,
+			remarks,
+			del_flag,
+			settlement
+		) VALUES (
+			#{id},
+			#{cost},
+			#{state},
+			#{content},
+			#{proId},
+			#{oaWxExtendedSuper.id},
+			#{createBy.id},
+			#{createDate},
+			#{remarks},
+			#{delFlag},
+			#{settlement}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE oa_wx_extended SET 	
+			cost = #{cost},
+			state = #{state},
+			exte_super = #{oaWxExtendedSuper.id},
+			content = #{content},
+			pro_id=#{proId},
+			settlement = #{settlement}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		UPDATE oa_wx_extended SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+    <update id="updateAudit">
+        UPDATE oa_wx_extended SET
+        state = #{state},
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="findByid" resultType="OaWxExtended">
+        SELECT
+        <include refid="oaWxExtendedColumns"/>
+        FROM oa_wx_extended a
+        <include refid="oaWxExtendedJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            AND a.id=#{id}
+        </where>
+    </select>
+
+    <select id="findBylistid" resultType="OaWxExtended">
+        SELECT
+        <include refid="oaWxExtendedColumns"/>
+        FROM oa_wx_extended a
+        <include refid="oaWxExtendedJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            AND a.exte_super=#{oaWxExtendedSuper.id}
+        </where>
+    </select>
+    <select id="findBySuperId" resultType="OaWxExtended">
+        SELECT
+        <include refid="oaWxExtendedColumns"/>,
+        c.id as "jd.id",
+        c.name as "jd.name",
+        d.id as "lx.id",
+        d.name as "lx.name"
+        FROM oa_wx_extended a
+        <include refid="oaWxExtendedJoins"/>
+        left join oa_wx_bx_correlation b on a.id=b.details_id
+        left join oa_wx_stage_of_reimbursement c on b.stage_id = c.id
+        left join oa_wx_basic_classification_of_reimbursement d on b.classification_id=d.id
+        left join oa_wx_bx_correlation_super e on e.extended_super_id=a.exte_super
+        WHERE e.id= #{oaWxBxCorrelationSuper.id}
+    </select>
+
+    <select id="findBySuperProId" resultType="OaWxExtended">
+        SELECT
+        <include refid="oaWxExtendedColumns"/>
+        FROM oa_wx_extended a
+        <include refid="oaWxExtendedJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            AND a.exte_super=#{oaWxExtendedSuper.id}
+            AND a.pro_id='0'
+        </where>
+    </select>
+    <select id="proCount" resultType="pd">
+		SELECT
+	h.namea as namea,
+	sum(h.cost) as cost,
+	h.fid as fid
+FROM
+	(
+		SELECT
+			e.cost/100 AS cost,
+			f. NAME AS namea,
+			g. NAME AS nameb,
+			g.id AS gid,
+			f.id AS fid
+		FROM
+			(
+				SELECT
+					c.details_id,
+					c.stage_id,
+					c.classification_id,
+					d.cost
+				FROM
+					oa_wx_bx_correlation c
+				INNER JOIN (
+					SELECT
+						a.id AS did,
+						a.cost AS cost,
+						b.id
+					FROM
+						oa_wx_extended a
+					INNER JOIN (
+						(
+							SELECT
+								id
+							FROM
+								oa_wx_extended_super
+							WHERE
+								pro_id = #{proId}
+							AND state = '1'
+							AND appropriation = '1'
+						)
+					) AS b ON a.exte_super = b.id
+				) d ON c.details_id = d.did
+			) e
+		LEFT JOIN oa_wx_stage_of_reimbursement AS f ON f.id = e.stage_id
+		LEFT JOIN oa_wx_basic_classification_of_reimbursement g ON e.classification_id = g.id
+	) AS h
+GROUP BY
+	namea;
+	</select>
+
+    <select id="proCountItem" resultType="pd">
+		SELECT
+	h.gid as gid,
+	h.fid as fid,
+	h.nameb as nameb,
+	SUM(cost/100) as sums
+FROM
+	(
+		SELECT
+			e.cost AS cost,
+			f. NAME AS namea,
+			g. NAME AS nameb,
+			g.id AS gid,
+			f.id AS fid
+		FROM
+			(
+				SELECT
+					c.details_id,
+					c.stage_id,
+					c.classification_id,
+					d.cost
+				FROM
+					oa_wx_bx_correlation c
+				INNER JOIN (
+					SELECT
+						a.id AS did,
+						a.cost AS cost,
+						b.id
+					FROM
+						oa_wx_extended a
+					INNER JOIN (
+						(
+							SELECT
+								id
+							FROM
+								oa_wx_extended_super
+							WHERE
+								pro_id = #{proId}
+							AND state = '1'
+							AND appropriation = '1'
+						)
+					) AS b ON a.exte_super = b.id
+				) d ON c.details_id = d.did
+			) e
+		LEFT JOIN oa_wx_stage_of_reimbursement AS f ON f.id = e.stage_id
+		LEFT JOIN oa_wx_basic_classification_of_reimbursement g ON e.classification_id = g.id
+	) AS h
+WHERE
+	h.fid = #{fid}
+GROUP BY
+	h.nameb;
+	</select>
+</mapper>

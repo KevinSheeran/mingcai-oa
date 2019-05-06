@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.user.OaUserAccountLogDao">
+    
+	<sql id="oaUserAccountLogColumns">
+		a.id AS "id",
+		a.user_id AS "userId",
+		a.sales_volume_id AS "salesVolumeId.id",
+		osv.sales_volume/100 AS "salesVolumeId.salesVolume",
+		osv.remarks AS "salesVolumeId.remarks",
+		osv.uotaRatio AS "salesVolumeId.uotaRatio",
+		a.branch_quota/100 AS "branchQuota",
+		a.pool_funds/100 AS "poolFunds",
+		a.cost_incurred/100 AS "costIncurred",
+		a.spare_a/100 AS "spareA",
+		a.spare_b/100 AS "spareB",
+		a.spare_c/100 AS "spareC",
+		a.string_a AS "stringA",
+		a.string_b AS "stringB",
+		a.string_c AS "stringC",
+		a.flag AS "flag",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.begin_end_month as "beginEndMonth"
+	</sql>
+	
+	<sql id="oaUserAccountLogJoins">
+			left join oa_user_sales_volume  osv on osv.id=a.sales_volume_id
+	</sql>
+    
+	<select id="get" resultType="OaUserAccountLog">
+		SELECT 
+			<include refid="oaUserAccountLogColumns"/>
+		FROM oa_user_account_log a
+		<include refid="oaUserAccountLogJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaUserAccountLog">
+		SELECT 
+			<include refid="oaUserAccountLogColumns"/>
+		FROM oa_user_account_log a
+		<include refid="oaUserAccountLogJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="userId!=null and userId!=''">
+				and a.user_id=#{userId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.begin_end_month DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaUserAccountLog">
+		SELECT 
+			<include refid="oaUserAccountLogColumns"/>
+		FROM oa_user_account_log a
+		<include refid="oaUserAccountLogJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_user_account_log(
+			id,
+			user_id,
+			sales_volume_id,
+			branch_quota,
+			pool_funds,
+			cost_incurred,
+			spare_a,
+			spare_b,
+			spare_c,
+			string_a,
+			string_b,
+			string_c,
+			flag,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			begin_end_month
+		) VALUES (
+			#{id},
+			#{userId},
+			#{salesVolumeId.id},
+			#{branchQuota}*100,
+			#{poolFunds}*100,
+			#{costIncurred}*100,
+			#{spareA}*100,
+			#{spareB}*100,
+			#{spareC}*100,
+			#{stringA},
+			#{stringB},
+			#{stringC},
+			#{flag},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{beginEndMonth}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_user_account_log SET
+			user_id = #{userId},
+			begin_end_month = #{beginEndMonth},
+			sales_volume_id = #{salesVolumeId.id},
+			branch_quota = #{branchQuota}*100,
+			pool_funds = #{poolFunds}*100,
+			cost_incurred = #{costIncurred}*100,
+			spare_a = #{spareA}*100,
+			spare_b = #{spareB}*100,
+			spare_c = #{spareC}*100,
+			string_a = #{stringA},
+			string_b = #{stringB},
+			string_c = #{stringC},
+			flag = #{flag},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_user_account_log SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

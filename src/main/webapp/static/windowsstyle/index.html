@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>仿windows桌面主题特效</title>
+<style type="text/css">
+
+</style>
+  <link rel="stylesheet" href="static/windowsstyle/jsLib/themes/base/style-c.css" />
+  <link rel="stylesheet" href="static/windowsstyle/jsLib/themes/base/jquery.ui.all.css" />
+  <link rel="stylesheet" href="static/windowsstyle/jsLib/jquery-smartMenu/css/smartMenu.css" />
+  <script type="text/javascript" src="static/windowsstyle/jsLib/jquery-1.6.2.js"></script>
+  <script type="text/javascript" src="static/windowsstyle/jsLib/myLib.js"></script>
+  <script type="text/javascript" src="static/windowsstyle/jsLib/jquery-ui-1.8.16.custom.min.js"></script>
+  <script type="text/javascript" src="static/windowsstyle/jsLib/jquery.winResize.js"></script>
+  <script type="text/javascript" src="static/windowsstyle/jsLib/jquery-smartMenu/js/mini/jquery-smartMenu-min.js"></script>
+  <script type="text/javascript" src="static/windowsstyle/jsLib/myjs.js"></script>
+
+</head>
+<body>
+<a href="#" class="powered_by">Powered by jWebOS</a>
+<ul id="deskIcon">
+  <li class="desktop_icon" id="win5" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon4.png"/></span>
+    <div class="text">相册
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win6" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon5.png"/></span>
+    <div class="text">游戏
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win7" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon6.png"/></span>
+    <div class="text">日历
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win8" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon7.png"/></span>
+    <div class="text">聊天室
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win9" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon8.png"/></span>
+    <div class="text">通讯薄
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win10" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon9.png"/></span>
+    <div class="text">日记
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win11" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon10.png"/></span>
+    <div class="text">文档资料
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win12" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon6.png"/></span>
+    <div class="text">日历
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win14" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon7.png"/></span>
+    <div class="text">聊天室
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win13" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon8.png"/></span>
+    <div class="text">通讯薄
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win15" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon9.png"/></span>
+    <div class="text">日记
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win16" path="http://www.jq22.com"> <span class="icon"><img src="icon/icon10.png"/></span>
+    <div class="text">文档资料
+      <div class="right_cron"></div>
+    </div>
+  </li>
+</ul>
+<div id="taskBar">
+  <div id="leftBtn"><a href="#" class="upBtn"></a></div>
+  <div id="rightBtn"><a href="#" class="downBtn"></a> </div>
+  <div id="task_lb_wrap">
+    <div id="task_lb"></div>
+  </div>
+</div>
+<div id="lr_bar">
+  <ul id="default_app">
+    <li id="app0"><img src="icon/icon1.png" title="Jquery API" path="http://www.jq22.com/?api/api.html"/></li>
+    <li  id="app2"><img src="icon/icon0.png" title="学习资料库" path="http://www.jq22.com/?Material.aspx"/></li>
+    <li id="app3"><img src="icon/icon2.png" title="QQ群堂" path="http://www.jq22.com/?QQGroup.aspx"/></li>
+    <li id="app4"> <img src="icon/icon3.png" title="在线留言" path="http://www.jq22.com/?Feedback.aspx"/></li>
+    <li id="app1"><img src="icon/icon11.png" title="Jquery学堂" path="http://www.jq22.com/?Jquery.aspx"/></li>
+  </ul>
+  <div id="default_tools"> <span id="showZm_btn" title="显示桌面"></span><span id="shizhong_btn" title="时钟"></span><span id="weather_btn" title="天气"></span> <span id="them_btn" title="主题"></span></div>
+  <div id="start_block"> <a title="开始" id="start_btn"></a>
+    <div id="start_item">
+      <ul class="item admin">
+        <li><span class="adminImg"></span> Admin</li>
+      </ul>
+      <ul class="item">
+        <li><span class="sitting_btn"></span>系统设置</li>
+        <li><span class="help_btn"></span>使用指南 <b></b></li>
+        <li><span class="about_btn"></span>关于我们</li>
+        <li><span class="logout_btn"></span>退出系统</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

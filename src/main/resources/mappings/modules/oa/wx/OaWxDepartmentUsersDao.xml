@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.wx.OaWxDepartmentUsersDao">
+    
+	<sql id="oaWxDepartmentUsersColumns">
+		a.userid AS "userid",
+		a.id AS "id",
+		a.order AS "order",
+		a.is_leader_in_dept AS "isLeaderInDept",
+		owu.name AS "wxuser.name",
+		owu.mobile AS "wxuser.mobile",
+		owu.department AS "wxuser.department_s",
+		owu.order AS "wxuser.order_s",
+		owu.position AS "wxuser.position",
+		owu.gender AS "wxuser.gender",
+		owu.email AS "wxuser.email",
+		owu.is_leader_in_dept AS "wxuser.is_leader_in_dept_s",
+		owu.avatar AS "wxuser.avatar",
+		owu.telephone AS "wxuser.telephone",
+		owu.enable AS "wxuser.enable",
+		owu.alias AS "wxuser.alias",
+		owu.status AS "wxuser.status",
+		owu.qr_code AS "wxuser.qr_code",
+		owu.external_position AS "wxuser.external_position",
+		owu.address AS "wxuser.address",
+		owd.name AS "wxdepartment.name",
+		owd.parentid AS "wxdepartment.parentid",
+		owd.order AS "wxdepartment.order"
+	</sql>
+	
+	<sql id="oaWxDepartmentUsersJoins">
+		LEFT JOIN oa_wx_users owu on owu.userid=a.userid
+		LEFT JOIN oa_wx_department owd on owd.id=a.id
+	</sql>
+    
+	<select id="get" resultType="OaWxDepartmentUsers">
+		SELECT 
+			<include refid="oaWxDepartmentUsersColumns"/>
+		FROM oa_wx_department_users a
+		<include refid="oaWxDepartmentUsersJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaWxDepartmentUsers">
+		SELECT 
+			<include refid="oaWxDepartmentUsersColumns"/>
+		FROM oa_wx_department_users a
+		<include refid="oaWxDepartmentUsersJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaWxDepartmentUsers">
+		SELECT 
+			<include refid="oaWxDepartmentUsersColumns"/>
+		FROM oa_wx_department_users a
+		<include refid="oaWxDepartmentUsersJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_wx_department_users(
+			userid,
+			id,
+			`order`,
+			is_leader_in_dept
+		) VALUES (
+			#{userid},
+			#{id},
+			#{order},
+			#{isLeaderInDept}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_wx_department_users SET 	
+			userid = #{userid},
+			order = #{order},
+			is_leader_in_dept = #{isLeaderInDept}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM oa_wx_department_users
+	</update>
+	
+</mapper>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaWxBxCorrelationSuperDao">
+
+    <sql id="oaWxBxCorrelationSuperColumns">
+		 a.id AS "id",
+		a.extended_super_id AS "extendedSuperId",
+		a.pro_id AS "proId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		z.id AS "oaWxExtendedSuper.id",
+		z.state AS "oaWxExtendedSuper.state",
+		z.flow_id AS "oaWxExtendedSuper.flow.id",
+		z.pro_id AS "oaWxExtendedSuper.proId",
+		z.appropriation AS "oaWxExtendedSuper.appropriation",
+		z.pro_item_type AS "oaWxExtendedSuper.proItemType",
+		z.enclosure AS "oaWxExtendedSuper.enclosure",
+		z.update_by AS "oaWxExtendedSuper.updateBy.id",
+		z.remarks AS "oaWxExtendedSuper.remarks",
+		c.id as "pro.id",
+		c.name as "pro.name",
+        c.pa_number as "pro.paNumber",
+        c.pro_number as "pro.proNumber"
+	</sql>
+	<sql id="oaWxBxCorrelationSuperColumns1">
+		,
+        d.id as "jd.id",
+        d.name as "jd.name",
+        e.id as "lx.id",
+        e.name as "lx.name",
+        f.id AS "ex.id",
+		f.cost/100 AS "ex.cost",
+		f.state AS "ex.state",
+		f.content AS "ex.content",
+		f.pro_id AS "ex.proId",
+		f.exte_super AS "ex.oaWxExtendedSuper.id"
+	</sql>
+
+    <sql id="oaWxBxCorrelationSuperJoins">
+		left join  oa_wx_extended_super z on z.id=a.extended_super_id
+		LEFT JOIN oa_eos_pro c on a.pro_id=c.id
+		LEFT JOIN oa_eos_pro_un g on a.pro_id=g.id
+	</sql>
+	<sql id="oaWxBxCorrelationSuperJoins1">
+		left JOIN  oa_wx_bx_correlation b  on a.id=b.super_id
+		LEFT JOIN oa_wx_stage_of_reimbursement d on b.stage_id =d.id
+		LEFT JOIN oa_wx_basic_classification_of_reimbursement e on b.classification_id =e.id
+		LEFT JOIN oa_wx_extended f on b.details_id = f.id
+	</sql>
+
+    <select id="get" resultType="OaWxBxCorrelationSuper">
+        SELECT
+		a.id AS "id",
+		a.extended_super_id AS "extendedSuperId",
+		a.pro_id AS "proId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+        FROM oa_wx_bx_correlation_super a
+        WHERE a.id = #{id}
+    </select>
+
+	<select id="get2" resultType="OaWxBxCorrelationSuper">
+        SELECT
+		a.id AS "id",
+		a.extended_super_id AS "extendedSuperId",
+		a.pro_id AS "proId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+        FROM oa_wx_bx_correlation_super a
+        WHERE a.extended_super_id = #{extendedSuperId}
+    </select>
+
+	<select id="get1" resultType="OaWxBxCorrelationSuper">
+		SELECT
+		<include refid="oaWxBxCorrelationSuperColumns"/>
+		FROM oa_wx_bx_correlation_super a
+		<include refid="oaWxBxCorrelationSuperJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+    <select id="findList" resultType="OaWxBxCorrelationSuper">
+        SELECT
+        <include refid="oaWxBxCorrelationSuperColumns"/>
+        FROM oa_wx_bx_correlation_super a
+        <include refid="oaWxBxCorrelationSuperJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.create_by=#{createBy.id}
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="OaWxBxCorrelationSuper">
+        SELECT
+        <include refid="oaWxBxCorrelationSuperColumns"/>
+        FROM oa_wx_bx_correlation_super a
+        <include refid="oaWxBxCorrelationSuperJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+		INSERT INTO oa_wx_bx_correlation_super(
+			id,
+			extended_super_id,
+			pro_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{extendedSuperId},
+			#{proId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE oa_wx_bx_correlation_super SET 	
+			extended_super_id = #{extendedSuperId},
+			super_id=#{superId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		UPDATE oa_wx_bx_correlation_super SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+
+
+	<select id="findProcessedList" resultType="OaWxBxCorrelationSuper">
+		select <include refid="oaWxBxCorrelationSuperColumns"/> from  oa_wx_bx_correlation_super a  <include refid="oaWxBxCorrelationSuperJoins"/> where a.id in(
+		SELECT   b.id FROM oa_wx_bx_correlation_super b inner join  oa_wx_extended_super c on c.id= b.extended_super_id
+		inner JOIN oa_eos_flow_item flow ON flow.flow_id = c.flow_id
+		WHERE b.del_flag = 0 AND flow.user_id= #{userId} AND flow.status=1 AND rbs_type=0)  ORDER BY a.create_date DESC
+	</select>
+
+
+	<select id="findFinanceList" resultType="OaWxBxCorrelationSuper">
+		select <include refid="oaWxBxCorrelationSuperColumns"/>  from  oa_wx_bx_correlation_super a <include refid="oaWxBxCorrelationSuperJoins"/>   where a.id in(
+		SELECT   b.id FROM oa_wx_bx_correlation_super b inner join  oa_wx_extended_super c on c.id= b.extended_super_id
+		inner JOIN oa_eos_flow_item flow ON flow.flow_id = c.flow_id
+		WHERE c.del_flag = 0 and c.state!=0 and c.state!=2 AND c.rbs_type=0)  ORDER BY  z.state desc,z.appropriation asc,z.create_date DESC
+	</select>
+
+	<select id="findUntreatedList" resultType="OaWxBxCorrelationSuper">
+		select <include refid="oaWxBxCorrelationSuperColumns"/> from  oa_wx_bx_correlation_super a <include refid="oaWxBxCorrelationSuperJoins"/>  where a.id in(
+		SELECT   b.id FROM oa_wx_bx_correlation_super b inner join  oa_wx_extended_super c on c.id= b.extended_super_id
+		inner JOIN oa_eos_flow_item flow ON flow.flow_id = c.flow_id
+		WHERE c.del_flag = 0 AND flow.user_id= #{userId} AND c.state=0 AND flow.status=0 AND c.rbs_type=0 ) ORDER BY a.create_date DESC
+	</select>
+
+	<select id="findFinanceExcel" resultType="OaWxBxCorrelationSuper">
+		select <include refid="oaWxBxCorrelationSuperColumns"/>  from  oa_wx_bx_correlation_super a <include refid="oaWxBxCorrelationSuperJoins"/>   where a.id in(
+		SELECT   b.id FROM oa_wx_bx_correlation_super b inner join  oa_wx_extended_super c on c.id= b.extended_super_id
+		inner JOIN oa_eos_flow_item flow ON flow.flow_id = c.flow_id
+		WHERE c.del_flag = 0 and c.appropriation='1' AND  c.rbs_type=0  ) and a.create_date &gt; str_to_date(#{kssj}, '%Y-%m-%d %H')   and a.create_date &lt; str_to_date(#{jssj}, '%Y-%m-%d %H')   ORDER BY  z.state desc,z.appropriation asc,z.create_date DESC
+	</select>
+
+</mapper>

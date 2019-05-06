@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosProTimetotalItemDao">
+    
+	<sql id="oaEosProTimetotalItemColumns">
+		a.id AS "id",
+		a.pro_id AS "proId",
+		a.ps_total AS "psTotal",
+		a.sale_total AS "saleTotal",
+		a.rd_total AS "rdTotal",
+		a.times AS "times",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaEosProTimetotalItemJoins">
+	</sql>
+    
+	<select id="get" resultType="OaEosProTimetotalItem">
+		SELECT 
+			<include refid="oaEosProTimetotalItemColumns"/>
+		FROM oa_eos_pro_timetotal_item a
+		<include refid="oaEosProTimetotalItemJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getByTimes" resultType="OaEosProTimetotalItem">
+		SELECT
+		<include refid="oaEosProTimetotalItemColumns"/>
+		FROM oa_eos_pro_timetotal_item a
+		<include refid="oaEosProTimetotalItemJoins"/>
+		WHERE a.times = #{times} and a.pro_id = #{proId}
+	</select>
+	<select id="findList" resultType="OaEosProTimetotalItem">
+		SELECT 
+			<include refid="oaEosProTimetotalItemColumns"/>
+		FROM oa_eos_pro_timetotal_item a
+		<include refid="oaEosProTimetotalItemJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.pro_id= #{proId}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaEosProTimetotalItem">
+		SELECT 
+			<include refid="oaEosProTimetotalItemColumns"/>
+		FROM oa_eos_pro_timetotal_item a
+		<include refid="oaEosProTimetotalItemJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_eos_pro_timetotal_item(
+			id,
+			pro_id,
+			ps_total,
+			sale_total,
+			rd_total,
+			times,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{proId},
+			#{psTotal},
+			#{saleTotal},
+			#{rdTotal},
+			#{times},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_pro_timetotal_item SET 	
+			pro_id = #{proId},
+			ps_total = #{psTotal},
+			sale_total = #{saleTotal},
+			rd_total = #{rdTotal},
+			times = #{times},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_eos_pro_timetotal_item SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

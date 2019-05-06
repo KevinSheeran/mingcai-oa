@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosProItemDao">
+    
+	<sql id="oaEosProItemColumns">
+		a.id AS "id",
+		a.eos_id AS "eosId",
+		a.eos_z_id AS"eosZId",
+		a.name AS "name",
+		a.pro_cycle AS "proCycle",
+		a.person_liable_user AS "personLiableUser.id",
+		u5.name AS "personLiableUser.name",
+		a.pro_content AS "proContent",
+		a.user_ids AS "userIds",
+		a.estimated_amount AS "estimatedAmount",
+		a.gross_profit_margin AS "grossProfitMargin",
+		a.input_estimation/100 AS "inputEstimation",
+		a.workload_time AS "workloadTime",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.eos_z_id as "eosZId"
+	</sql>
+	
+	<sql id="oaEosProItemJoins">
+		LEFT JOIN sys_user u5 ON u5.id = a.person_liable_user
+	</sql>
+    
+	<select id="get" resultType="OaEosProItem">
+		SELECT 
+			<include refid="oaEosProItemColumns"/>
+		FROM oa_eos_pro_item a
+		<include refid="oaEosProItemJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaEosProItem">
+		SELECT 
+			<include refid="oaEosProItemColumns"/>
+		FROM oa_eos_pro_item a
+		<include refid="oaEosProItemJoins"/>
+		<where>
+			1=1
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			AND  a.eos_id=#{eosId}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaEosProItem">
+		SELECT 
+			<include refid="oaEosProItemColumns"/>
+		FROM oa_eos_pro_item a
+		<include refid="oaEosProItemJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_eos_pro_item(
+			id,
+			eos_id,
+			eos_z_id,
+			name,
+			pro_cycle,
+			person_liable_user,
+			pro_content,
+			estimated_amount,
+			gross_profit_margin,
+			input_estimation,
+			workload_time,
+			user_ids,
+			create_by,
+			create_date,
+			update_by,
+			update_date
+		) VALUES (
+			#{id},
+			#{eosId},
+			#{eosZId},
+			#{name},
+			#{proCycle},
+			#{personLiableUser.id},
+			#{proContent},
+			#{estimatedAmount},
+			#{grossProfitMargin},
+			#{inputEstimation},
+			#{workloadTime},
+			#{userIds},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_pro_item SET 	
+			eos_id = #{eosId},
+			eos_z_id=#{eosZId}
+			name = #{name},
+			pro_cycle = #{proCycle},
+			person_liable_user = #{personLiableUser.id},
+			pro_content = #{proContent},
+			estimated_amount = #{estimatedAmount},
+			gross_profit_margin = #{grossProfitMargin},
+			input_estimation = #{inputEstimation},
+			workload_time = #{workloadTime},
+			user_ids = #{userIds},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM oa_eos_pro_item
+		WHERE id = #{id}
+	</update>
+	<select id="selByproid" resultType="OaEosProItem">
+		SELECT
+		<include refid="oaEosProItemColumns"/>
+		FROM oa_eos_pro_item a
+		<include refid="oaEosProItemJoins"/>
+		<where>
+				a.id=#{id}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<!--findListinit项目查询初始化方法-->
+	<select id="findListinit" resultType="OaEosProItem">
+		SELECT
+		<include refid="oaEosProItemColumns"/>
+		FROM oa_eos_pro_item a
+		<include refid="oaEosProItemJoins"/>
+	</select>
+	<select id="selByprolistid" resultType="OaEosProItem">
+		SELECT
+		<include refid="oaEosProItemColumns"/>
+		FROM oa_eos_pro_item a
+		<include refid="oaEosProItemJoins"/>
+		<where>
+
+			<if test="name != null and name != ''">
+				AND a.name LIKE
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="eosId !=null and eosId != ''">
+				AND eos_id=#{eosId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<update id="updateCumulative">
+		update  oa_eos_pro_item set input_estimation=#{inputEstimation}*100 where id=#{id}
+	</update>
+
+
+	<select id="itemBySum" resultType="java.lang.Double">
+		select SUM(input_estimation)/100 from  oa_eos_pro_item where eos_id=#{eosId}
+	</select>
+
+
+</mapper>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosNumberDao">
+    
+	<sql id="oaEosNumberColumns">
+		a.id AS "id",
+		a.item_number AS "itemNumber",
+		a.item_number_type AS "itemNumberType",
+		a.correlation_id AS "correlationId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		pro.id AS "pro.id",
+		pro.name as "pro.name",
+		un.id as "un.id",
+		un.name as "un.name"
+	</sql>
+	
+	<sql id="oaEosNumberJoins">
+		left join  oa_eos_pro pro on  a.item_number=pro.pa_number or  a.item_number=pro.pro_number  left join  oa_eos_pro_un un  on a.item_number=un.pro_number
+	</sql>
+	<select id="get" resultType="OaEosNumber">
+		SELECT 
+			<include refid="oaEosNumberColumns"/>
+		FROM oa_eos_number a
+		<include refid="oaEosNumberJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaEosNumber">
+		SELECT 
+			<include refid="oaEosNumberColumns"/>
+		FROM oa_eos_number a
+		<include refid="oaEosNumberJoins"/>
+		<where>
+			<if test="itemNumber!=null and itemNumber!=''">
+				 a.item_number LIKE
+				<if test="dbName == 'oracle'">'%'||#{itemNumber}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{itemNumber}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{itemNumber},'%')</if>
+			</if>
+			AND a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaEosNumber">
+		SELECT 
+			<include refid="oaEosNumberColumns"/>
+		FROM oa_eos_number a
+		<include refid="oaEosNumberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_eos_number(
+			id,
+			item_number,
+			item_number_type,
+			correlation_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{itemNumber},
+			#{itemNumberType},
+			#{correlationId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_number SET 	
+			item_number = #{itemNumber},
+			item_number_type = #{itemNumberType},
+			correlation_id = #{correlationId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_eos_number SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<select id="getNumberByMobile" resultType="OaEosNumber" >
+		SELECT
+		<include refid="oaEosNumberColumns"/>
+		FROM oa_eos_number a
+		<include refid="oaEosNumberJoins"/>
+		WHERE a.item_number = #{itemNumber} AND a.del_flag = #{DEL_FLAG_NORMAL}
+	</select>
+
+</mapper>

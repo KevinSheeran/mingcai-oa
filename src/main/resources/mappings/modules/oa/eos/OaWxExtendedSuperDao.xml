@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaWxExtendedSuperDao">
+
+    <sql id="oaWxExtendedSuperColumns">
+		a.id AS "id",
+		a.state AS "state",
+		a.flow_id AS "flow.id",
+		a.pro_id AS "proId",
+		a.appropriation AS "appropriation",
+		a.pro_item_type AS "proItemType",
+		a.rbs_type as "rbsType",
+		a.enclosure AS "enclosure",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+        pro.id as "pro.id",
+        pro.pa_number as "pro.paNumber",
+        pro.pro_number as "pro.proNumber",
+        pro.name as "pro.name",
+        dep.id as "oaWxDepartment.id",
+        dep.name as "oaWxDepartment.name",
+        un.id as "oaEosProUn.id",
+        un.name as "oaEosProUn.name",
+        un.pro_number as "oaEosProUn.proNumber"
+	</sql>
+
+    <sql id="oaWxExtendedSuperJoins">
+        left join oa_eos_pro pro on pro.id=a.pro_id left join  oa_wx_department dep on a.pro_id=dep.id  left join oa_eos_pro_un un on un.id=a.pro_id
+    </sql>
+
+    <select id="get" resultType="OaWxExtendedSuper">
+        SELECT
+        <include refid="oaWxExtendedSuperColumns"/>
+        FROM oa_wx_extended_super a
+        <include refid="oaWxExtendedSuperJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="OaWxExtendedSuper">
+        SELECT
+        <include refid="oaWxExtendedSuperColumns"/>
+        FROM oa_wx_extended_super a
+        <include refid="oaWxExtendedSuperJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            AND
+            a.create_by=#{createBy.id}
+            and  a.rbs_type=#{rbsType}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="OaWxExtendedSuper">
+        SELECT
+        <include refid="oaWxExtendedSuperColumns"/>
+        FROM oa_wx_extended_super a
+        <include refid="oaWxExtendedSuperJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+		INSERT INTO oa_wx_extended_super(
+			id,
+			state,
+			flow_id,
+			pro_id,
+			appropriation,
+			pro_item_type,
+			rbs_type,
+			enclosure,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{state},
+			#{flow.id},
+			#{proId},
+			#{appropriation},
+			#{proItemType},
+			#{rbsType},
+			#{enclosure},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE oa_wx_extended_super SET 	
+			state = #{state},
+			flow_id = #{flow.id},
+			pro_id = #{proId},
+			appropriation = #{appropriation},
+			rbs_type= #{rbsType},
+			enclosure = #{enclosure},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		UPDATE oa_wx_extended_super SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+    <update id="updateAudit">
+        UPDATE oa_wx_extended_super SET
+        state = #{state},
+        flow_id = #{flow.id}
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="findByid" resultType="OaWxExtendedSuper">
+        SELECT
+        <include refid="oaWxExtendedSuperColumns"/>
+        FROM oa_wx_extended_super a
+        <include refid="oaWxExtendedSuperJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            AND a.id=#{id}
+        </where>
+    </select>
+
+    <update id="updateApproPriAtion">
+		UPDATE oa_wx_extended_super SET
+			appropriation=#{appropriation}
+		WHERE id = #{id}
+	</update>
+
+    <select id="findProcessedList" resultType="OaWxExtendedSuper">
+        select <include refid="oaWxExtendedSuperColumns"/> from  oa_wx_extended_super a  <include refid="oaWxExtendedSuperJoins"/> where a.id in(
+      SELECT  distinct b.id FROM oa_wx_extended_super b
+      inner JOIN oa_eos_flow_item flow ON flow.flow_id = b.flow_id
+      WHERE b.del_flag = 0 AND flow.user_id= #{userId} AND flow.status=1 AND rbs_type=1)  ORDER BY a.create_date DESC
+    </select>
+
+
+    <select id="findFinanceList" resultType="OaWxExtendedSuper">
+        select  <include refid="oaWxExtendedSuperColumns"/>  from  oa_wx_extended_super a <include refid="oaWxExtendedSuperJoins"/>   where a.id in(
+        SELECT  distinct b.id FROM oa_wx_extended_super b
+        inner JOIN oa_eos_flow_item flow ON flow.flow_id = b.flow_id
+        WHERE b.del_flag = 0 and b.state!=0 and b.state!=2 AND rbs_type=1) ORDER BY  a.state desc,a.appropriation asc,a.create_date DESC
+    </select>
+
+    <select id="findUntreatedList" resultType="OaWxExtendedSuper">
+        select <include refid="oaWxExtendedSuperColumns"/> from  oa_wx_extended_super a  <include refid="oaWxExtendedSuperJoins"/>  where a.id in(
+        SELECT  distinct b.id FROM oa_wx_extended_super b
+        inner JOIN oa_eos_flow_item flow ON flow.flow_id = b.flow_id
+        WHERE b.del_flag = 0 AND flow.user_id= #{userId} AND b.state=0 AND flow.status=0 AND rbs_type=1 ) ORDER BY a.create_date DESC
+    </select>
+
+
+
+    <select id="findByProId" resultType="OaWxExtendedSuper">
+        select <include refid="oaWxExtendedSuperColumns"/> from  oa_wx_extended_super a  <include refid="oaWxExtendedSuperJoins"/>  where a.pro_id=#{proId}
+    </select>
+    <select id="sumProUser" resultType="pd">
+        SELECT SUM(a.cost)/100  AS cost FROM `oa_wx_extended` a INNER JOIN `oa_wx_extended_super`  b ON a.exte_super=b.id WHERE a.pro_id='0' AND b.pro_id=#{proId} AND b.create_by=#{userId} AND b.appropriation=1
+    </select>
+</mapper>

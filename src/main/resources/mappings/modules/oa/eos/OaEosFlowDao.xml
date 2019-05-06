@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosFlowDao">
+    
+	<sql id="oaEosFlowColumns">
+		a.id AS "id",
+		a.eos_id AS "eosId",
+		a.user_id AS "user.id",
+		a.status AS "status",
+		a.content AS "content",
+		a.order AS "order",
+		a.serial_number AS "serialNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		u3.name AS "user.name",
+		owu.avatar as "user.wxUsers.avatar",
+		owu.name as "user.wxUsers.name",
+		a.send_status as "SendStatus",
+		a.send_content as "sendContent"
+	</sql>
+	
+	<sql id="oaEosFlowJoins">
+		LEFT JOIN sys_user u3 ON u3.id = a.user_id
+		LEFT JOIN oa_wx_users owu ON owu.mobile = u3.mobile
+	</sql>
+    
+	<select id="get" resultType="OaEosFlow">
+		SELECT 
+			<include refid="oaEosFlowColumns"/>
+		FROM oa_eos_flow a
+		<include refid="oaEosFlowJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaEosFlow">
+		SELECT 
+			<include refid="oaEosFlowColumns"/>
+		FROM oa_eos_flow a
+		<include refid="oaEosFlowJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListByEosId" resultType="OaEosFlow">
+		SELECT
+		<include refid="oaEosFlowColumns"/>
+		FROM oa_eos_flow a
+		<include refid="oaEosFlowJoins"/>
+		<where>
+			a.eos_id=#{eosId}
+		</where>
+		ORDER BY a.serial_number,a.order
+	</select>
+	<select id="findAllList" resultType="OaEosFlow">
+		SELECT 
+			<include refid="oaEosFlowColumns"/>
+		FROM oa_eos_flow a
+		<include refid="oaEosFlowJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_eos_flow(
+			id,
+			eos_id,
+			user_id,
+			status,
+			content,
+			`order`,
+			serial_number,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			send_status,
+			send_content
+		) VALUES (
+			#{id},
+			#{eosId},
+			#{user.id},
+			#{status},
+			#{content},
+			#{order},
+			#{serialNumber},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{SendStatus},
+			#{sendContent}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_flow SET 	
+			eos_id = #{eosId},
+			user_id = #{user.id},
+			status = #{status},
+			content = #{content},
+			`order` = #{order},
+			serial_number = #{serialNumber},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			send_status = #{SendStatus},
+			send_content = #{sendContent}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM oa_eos_flow
+		WHERE eos_id = #{eosId}
+	</update>
+	
+</mapper>

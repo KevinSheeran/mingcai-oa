@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.wx.OaWxUsersDao">
+    
+	<sql id="oaWxUsersColumns">
+		a.id AS "id",
+		a.userid as "userid",
+		a.name AS "name",
+		a.mobile AS "mobile",
+		a.department AS "departmentId",
+		a.order AS "order_s",
+		a.position AS "position",
+		a.gender AS "gender",
+		a.email AS "email",
+		a.is_leader_in_dept AS "is_leader_in_dept_s",
+		a.avatar AS "avatar",
+		a.telephone AS "telephone",
+		a.enable AS "enable",
+		a.alias AS "alias",
+		a.status AS "status",
+		a.qr_code AS "qrCode",
+		a.external_position AS "external_position",
+		a.address AS "address",
+		a.pinyin AS "pinyin",
+		b.id as "user.id"
+	</sql>
+	
+	<sql id="oaWxUsersJoins">
+		LEFT JOIN sys_user b ON b.mobile = a.mobile
+	</sql>
+	<select id="get" resultType="OaWxUsers">
+		SELECT 
+			<include refid="oaWxUsersColumns"/>
+		FROM oa_wx_users a
+		<include refid="oaWxUsersJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaWxUsers">
+		SELECT 
+			<include refid="oaWxUsersColumns"/>
+		FROM oa_wx_users a
+		<include refid="oaWxUsersJoins"/>
+		<where>
+			1=1
+			<if test="departmentId != null and departmentId != null and departmentId != ''">
+				and a.department LIKE (
+				<if test="dbName == 'oracle'">'%,'||#{departmentId}||',%')</if>
+				<if test="dbName == 'mssql'">'%,'+#{departmentId}+',%')</if>
+				<if test="dbName == 'mysql'">CONCAT('%,', #{departmentId}, ',%'))</if>
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaWxUsers">
+		SELECT 
+			<include refid="oaWxUsersColumns"/>
+		FROM oa_wx_users a
+		<include refid="oaWxUsersJoins"/>
+		<where>
+			
+		</where>		
+		ORDER BY pinyin ASC
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_wx_users(
+			id,
+			userid,
+			name,
+			mobile,
+			department,
+			`order`,
+			`position`,
+			gender,
+			email,
+			is_leader_in_dept,
+			avatar,
+			telephone,
+			enable,
+			alias,
+			status,
+			qr_code,
+			external_position,
+			address,
+			pinyin
+		) VALUES (
+			#{id},
+			#{userid},
+			#{name},
+			#{mobile},
+			#{department_s},
+			#{order_s},
+			#{position},
+			#{gender},
+			#{email},
+			#{is_leader_in_dept_s},
+			#{avatar},
+			#{telephone},
+			#{enable},
+			#{alias},
+			#{status},
+			#{qr_code},
+			#{external_position},
+			#{address},
+			#{pinyin}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_wx_users SET
+			userid = #{userid},
+			name = #{name},
+			mobile = #{mobile},
+			department = #{department},
+			`order` = #{order},
+			`position` = #{position},
+			gender = #{gender},
+			email = #{email},
+			is_leader_in_dept = #{isLeader_in_dept},
+			avatar = #{avatar},
+			telephone = #{telephone},
+			enable = #{enable},
+			alias = #{alias},
+			status = #{status},
+			qr_code = #{qr_code},
+			external_position = #{external_position},
+			address = #{address},
+			pinyin=#{pinyin}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM oa_wx_users
+	</update>
+	
+</mapper>

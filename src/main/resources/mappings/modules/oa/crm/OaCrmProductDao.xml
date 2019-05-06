@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.crm.OaCrmProductDao">
+    
+	<sql id="oaCrmProductColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.customer_ids AS "customerIds",
+		a.status AS "status",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		u3.name AS "updateBy.name",
+		u4.name AS "createBy.name",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaCrmProductJoins">
+		LEFT JOIN sys_user u4 ON u4.id = a.create_by
+		LEFT JOIN sys_user u3 ON u3.id = a.update_by
+	</sql>
+    
+	<select id="get" resultType="OaCrmProduct">
+		SELECT 
+			<include refid="oaCrmProductColumns"/>
+		FROM oa_crm_product a
+		<include refid="oaCrmProductJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaCrmProduct">
+		SELECT 
+			<include refid="oaCrmProductColumns"/>
+		FROM oa_crm_product a
+		<include refid="oaCrmProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="!leader">
+				AND a.create_by = #{createBy.id}
+			</if>
+			and a.status!=3 and a.status!=4
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.status ASC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findOpenList" resultType="OaCrmProduct">
+		SELECT
+		<include refid="oaCrmProductColumns"/>
+		FROM oa_crm_product a
+		<include refid="oaCrmProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			and (a.status=3 or a.status=4)
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findApplyList" resultType="OaCrmProduct">
+		SELECT
+		<include refid="oaCrmProductColumns"/>
+		FROM oa_crm_product a
+		<include refid="oaCrmProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			and (a.status=4 or a.status=5)
+		</where>
+	</select>
+
+	<select id="findAllList" resultType="OaCrmProduct">
+		SELECT 
+			<include refid="oaCrmProductColumns"/>
+		FROM oa_crm_product a
+		<include refid="oaCrmProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_crm_product(
+			id,
+			name,
+			customer_ids,
+			status,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{customerIds},
+			#{status},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_crm_product SET 	
+			name = #{name},
+			customer_ids = #{customerIds},
+			status = #{status},
+			create_by = #{createBy.id},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_crm_product SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

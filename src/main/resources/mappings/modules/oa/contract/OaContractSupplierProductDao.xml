@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.contract.OaContractSupplierProductDao">
+    
+	<sql id="oaContractSupplierProductColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.specifications AS "specifications",
+		a.unit_price AS "unitPrice",
+		a.supplier_id AS "supplierId",
+		b.name AS "supplierName",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		u.name AS "updateBy.name",
+		u3.name AS "createBy.name",
+		a.tax_point as "taxPoint",
+		a.enclosure_path as "enclosurePath",
+		a.labels as "labels"
+	</sql>
+	
+	<sql id="oaContractSupplierProductJoins">
+		left join oa_contract_supplier b on b.id=a.supplier_id
+		left join  SYS_USER u
+    		ON u.id = a.update_by
+    	left JOIN SYS_USER u3
+    		ON u3.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="OaContractSupplierProduct">
+		SELECT 
+			<include refid="oaContractSupplierProductColumns"/>
+		FROM oa_contract_supplier_product a
+		<include refid="oaContractSupplierProductJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaContractSupplierProduct">
+		SELECT 
+			<include refid="oaContractSupplierProductColumns"/>
+		FROM oa_contract_supplier_product a
+		<include refid="oaContractSupplierProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="supplierId != null and supplierId != ''">
+				and a.supplier_id =#{supplierId}
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+				OR b.name  LIKE
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaContractSupplierProduct">
+		SELECT 
+			<include refid="oaContractSupplierProductColumns"/>
+		FROM oa_contract_supplier_product a
+		<include refid="oaContractSupplierProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="supplierId !=null and supplierId !=''">
+				and a.supplier_id =#{supplierId}
+			</if>
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_contract_supplier_product(
+			id,
+			name,
+			specifications,
+			unit_price,
+			supplier_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			tax_point,
+			enclosure_path,
+			labels
+		) VALUES (
+			#{id},
+			#{name},
+			#{specifications},
+			#{unitPrice},
+			#{supplierId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{taxPoint},
+			#{enclosurePath},
+			#{labels}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_contract_supplier_product SET 	
+			name = #{name},
+			specifications = #{specifications},
+			unit_price = #{unitPrice},
+			supplier_id = #{supplierId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			tax_point = #{taxPoint},
+			enclosure_path = #{enclosurePath},
+			labels =#{labels}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_contract_supplier_product SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

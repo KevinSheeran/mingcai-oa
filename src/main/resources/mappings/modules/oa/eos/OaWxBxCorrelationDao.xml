@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaWxBxCorrelationDao">
+    
+	<sql id="oaWxBxCorrelationColumns">
+		a.id AS "id",
+		a.details_id AS "detailsId",
+		a.stage_id AS "stageId",
+		a.classification_id AS "classificationId",
+		a.super_id as "superId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		c.id as "pro.id",
+		c.name as "pro.name",
+        c.pa_number as "pro.paNumber",
+        c.pro_number as "pro.pro.Number",
+        d.id as "jd.id",
+        d.name as "jd.name",
+        e.id as "lx.id",
+        e.name as "lx.name",
+        f.id AS "ex.id",
+		f.cost/100 AS "ex.cost",
+		f.state AS "ex.state",
+		f.content AS "ex.content",
+		f.pro_id AS "ex.proId",
+		f.exte_super AS "ex.oaWxExtendedSuper.id",
+		b.id AS "oaWxBxCorrelationSuper.id",
+		b.extended_super_id AS "oaWxBxCorrelationSuper.extendedSuperId",
+		b.pro_id AS "oaWxBxCorrelationSuper.proId",
+		i.id as "oaEosProStartItem.id",
+		i.name as "oaEosProStartItem.name",
+		i.eos_z_id as "oaEosProStartItem.eosZId",
+		i.eos_id as "oaEosProStartItem.eosId",
+		i.input_estimation as "oaEosProStartItem.inputEstimation"
+	</sql>
+	
+	<sql id="oaWxBxCorrelationJoins">
+		inner JOIN  oa_wx_bx_correlation_super b  on b.id=a.super_id
+		LEFT JOIN oa_eos_pro c on b.pro_id=c.id
+		LEFT JOIN oa_wx_stage_of_reimbursement d on a.stage_id =d.id
+		LEFT JOIN oa_wx_basic_classification_of_reimbursement e on a.classification_id =e.id
+		LEFT JOIN oa_wx_extended f on a.details_id = f.id
+		LEFT JOIN oa_eos_pro_un g on b.pro_id=g.id
+		LEFT JOIN oa_eos_pro_item i on i.eos_id = c.id
+	</sql>
+    
+	<select id="get" resultType="OaWxBxCorrelation">
+		SELECT 
+			<include refid="oaWxBxCorrelationColumns"/>
+		FROM oa_wx_bx_correlation a
+		<include refid="oaWxBxCorrelationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaWxBxCorrelation">
+		SELECT 
+			<include refid="oaWxBxCorrelationColumns"/>
+		FROM oa_wx_bx_correlation a
+		<include refid="oaWxBxCorrelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaWxBxCorrelation">
+		SELECT 
+			<include refid="oaWxBxCorrelationColumns"/>
+		FROM oa_wx_bx_correlation a
+		<include refid="oaWxBxCorrelationJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_wx_bx_correlation(
+			id,
+			details_id,
+			stage_id,
+			classification_id,
+			super_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{detailsId},
+			#{stageId},
+			#{classificationId},
+			#{superId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_wx_bx_correlation SET 	
+			details_id = #{detailsId},
+			stage_id = #{stageId},
+			classification_id = #{classificationId},
+			super_id=#{superId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_wx_bx_correlation SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findBySuperId" resultType="OaWxBxCorrelation">
+		SELECT
+		<include refid="oaWxBxCorrelationColumns"/>
+		FROM oa_wx_bx_correlation a
+		<include refid="oaWxBxCorrelationJoins"/>
+		WHERE a.super_id = #{oaWxBxCorrelationSuper.id}
+	</select>
+	<select id="selByProId" resultType="OaWxBxCorrelation">
+            SELECT
+      a. NAME AS "jd.name",
+	a.id AS "jd.id",
+	c. NAME AS "lx.name",
+	c.id AS "lx.id",
+	b.id AS "id",
+	b.details_id AS "detailsId",
+	b.stage_id AS "stageId",
+	b.classification_id AS "classificationId",
+	b.super_id AS "superId",
+	b.create_by AS "createBy.id",
+	b.create_date AS "createDate",
+	b.update_by AS "updateBy.id",
+	b.update_date AS "updateDate",
+	b.remarks AS "remarks",
+	b.del_flag AS "delFlag",
+	e.id AS "ex.id",
+	e.cost/100 AS "ex.cost",
+	e.state AS "ex.state",
+	e.content AS "ex.content",
+	e.pro_id AS "ex.proId",
+	e.exte_super AS "ex.oaWxExtendedSuper.id"
+    FROM
+        oa_wx_stage_of_reimbursement a
+    INNER JOIN oa_wx_bx_correlation b ON a.id = b.stage_id
+    INNER JOIN oa_wx_basic_classification_of_reimbursement c ON c.id = classification_id
+    INNER JOIN oa_wx_bx_correlation_super d ON b.super_id = d.id
+    INNER JOIN oa_wx_extended e ON e.id = b.details_id
+    WHERE
+        d.pro_id = 'b6605757f7644f8bacfb6b42b1207b83'
+	</select>
+</mapper>

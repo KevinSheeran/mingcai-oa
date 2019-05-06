@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosProUnDao">
+    
+	<sql id="oaEosProUnColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.flow_id AS "flow.id",
+		a.pro_number AS "proNumber",
+		a.person_liable_user AS "personLiableUser.id",
+		owu.avatar AS "personLiableUser.wxUsers.avatar",
+		u5.name AS "personLiableUser.name",
+		a.customer_name AS "customerName",
+		a.customer_user AS "customerUser",
+		a.customer_contact_information AS "customerContactInformation",
+		a.status AS "status",
+		a.pro_type AS "proType",
+		a.pro_location AS "proLocation",
+		a.department_id AS "departmentId",
+		c.name AS "company.name",
+		a.estimation AS "estimation",
+		a.work_date AS "workDate",
+		a.workload AS "workload",
+		a.pro_content AS "proContent",
+		a.user_ids AS "userIds",
+		a.create_by AS "createBy.id",
+		u.name as "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.progress as "progress",
+		d.id as "oaEosProTimetotal.id",
+		d.ps_total as "oaEosProTimetotal.psTotal",
+        d.sale_total as "oaEosProTimetotal.saleTotal",
+        d.rd_total as "oaEosProTimetotal.rdTotal",
+        a.real_input_estimation/100 as "realInputEstimation"
+
+	</sql>
+	
+	<sql id="oaEosProUnJoins">
+		LEFT JOIN sys_user u5 ON u5.id = a.person_liable_user
+		LEFT JOIN sys_user u ON u.id = a.create_by
+		LEFT JOIN sys_office c ON c.id = a.department_id
+		left join oa_eos_pro_timetotal d on d.id=a.id
+		LEFT JOIN oa_wx_users owu ON owu.mobile = u5.mobile
+	</sql>
+    
+	<select id="get" resultType="OaEosProUn">
+		SELECT 
+			<include refid="oaEosProUnColumns"/>
+		FROM oa_eos_pro_un a
+		<include refid="oaEosProUnJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="findListByFlowFinishUser" resultType="OaEosProUn">
+		SELECT
+		<include refid="oaEosProUnColumns"/>,
+		flow.create_date as "flow.createDate"
+		FROM oa_eos_pro_un a
+		<include refid="oaEosProUnJoins"/>
+		LEFT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND flow.user_id=#{userId}  and (flow.status=1 or flow.status=-1)
+		</where>
+		group by a.id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY flow.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListByUser" resultType="OaEosProUn">
+		SELECT
+		<include refid="oaEosProUnColumns"/>,
+		flow.create_date as "flow.createDate"
+		FROM oa_eos_pro_un a
+		<include refid="oaEosProUnJoins"/>
+		RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND flow.user_id=#{userId} and a.status=1 and flow.status=0
+		</where>
+		group by a.id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY flow.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findList" resultType="OaEosProUn">
+		SELECT 
+			<include refid="oaEosProUnColumns"/>
+		FROM oa_eos_pro_un a
+		<include refid="oaEosProUnJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="!leader">
+				AND (a.update_by = #{userId} OR  a.create_by = #{userId} OR  a.person_liable_user = #{userId} )
+			</if>
+			<if test="name != null and name != ''">
+				AND (a.name LIKE
+				concat('%',#{name},'%') or a.pro_number LIKE
+				concat('%',#{name},'%'))
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="status ==0">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaEosProUn">
+		SELECT 
+			<include refid="oaEosProUnColumns"/>
+		FROM oa_eos_pro_un a
+		<include refid="oaEosProUnJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_eos_pro_un(
+			id,
+			name,
+			flow_id,
+			pro_number,
+			person_liable_user,
+			customer_name,
+			customer_user,
+			customer_contact_information,
+			status,
+			pro_type,
+			pro_location,
+			department_id,
+			estimation,
+			work_date,
+			workload,
+			pro_content,
+			user_ids,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			progress,
+			real_input_estimation
+		) VALUES (
+			#{id},
+			#{name},
+			#{flow.id},
+			#{proNumber},
+			#{personLiableUser.id},
+			#{customerName},
+			#{customerUser},
+			#{customerContactInformation},
+			#{status},
+			#{proType},
+			#{proLocation},
+			#{departmentId},
+			#{estimation},
+			#{workDate},
+			#{workload},
+			#{proContent},
+			#{userIds},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{progress},
+			#{realInputEstimation}*100
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_pro_un SET 	
+			name = #{name},
+			flow_id = #{flow.id},
+			pro_number = #{proNumber},
+			person_liable_user = #{personLiableUser.id},
+			customer_name = #{customerName},
+			customer_user = #{customerUser},
+			customer_contact_information = #{customerContactInformation},
+			status = #{status},
+			pro_type = #{proType},
+			pro_location = #{proLocation},
+			department_id = #{departmentId},
+			estimation = #{estimation},
+			work_date = #{workDate},
+			workload = #{workload},
+			pro_content = #{proContent},
+			user_ids = #{userIds},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			progress = #{progress},
+			real_input_estimation =#{realInputEstimation}*100
+		WHERE id = #{id}
+	</update>
+	<update id="updateAudit">
+		UPDATE oa_eos_pro_un SET
+		status = #{status},
+		flow_id = #{flow.id},
+		pro_number = #{proNumber}
+		WHERE id = #{id}
+	</update>
+	<update id="delete">
+		UPDATE oa_eos_pro_un SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<select id="selByprozid" resultType="OaEosProUn">
+		SELECT
+		<include refid="oaEosProUnColumns"/>
+		FROM oa_eos_pro_un a
+		<include refid="oaEosProUnJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="proNumber != null and proNumber != ''">
+				AND a.pro_number = #{proNumber}
+			</if>
+			and  a.id  = #{id}
+		</where>
+	</select>
+
+	<update id="updatamoney">
+			UPDATE oa_eos_pro_un SET
+			real_input_estimation = #{realInputEstimation}*100
+		WHERE id = #{id}
+	</update>
+</mapper>

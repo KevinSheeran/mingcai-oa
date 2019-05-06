@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.OaProductDao">
+    
+	<sql id="oaProductColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.create_by AS "createBy.id",
+		u4.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		u3.photo as "updateBy.photo",
+		u3.name AS "updateBy.name",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.dir_path as "dirPath",
+		a.del_flag AS "delFlag"
+	</sql>
+	<sql id="oaProductJoins">
+LEFT JOIN sys_user u4 ON u4.id = a.create_by
+		LEFT JOIN sys_user u3 ON u3.id = a.update_by
+	</sql>
+	<sql id="oaProductUserJoins">
+
+		LEFT JOIN oa_product_users users on a.id=users.product_id
+	</sql>
+
+	<select id="get" resultType="OaProduct">
+		SELECT 
+			<include refid="oaProductColumns"/>
+		FROM oa_product a
+		<include refid="oaProductJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaProduct">
+		SELECT 
+			<include refid="oaProductColumns"/>
+		FROM oa_product a
+		<include refid="oaProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="!leader">
+			AND (a.update_by = #{userId} OR  a.create_by = #{userId})
+			or a.id in(select b.id from oa_product b join oa_product_users c on c.product_id=b.id where c.user_id=#{userId} and b.del_flag = #{DEL_FLAG_NORMAL})
+			</if>
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaProduct">
+		SELECT 
+			<include refid="oaProductColumns"/>
+		FROM oa_product a
+		<include refid="oaProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_product(
+			id,
+			name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			dir_path,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{dirPath},
+			#{delFlag}
+		)
+	</insert>
+	<!-- 插入项目组用户 -->
+	<insert id="insertProductUser">
+		INSERT INTO oa_product_users(product_id, user_id)
+		<foreach collection="pusers" item="pu" separator=" union all ">
+			SELECT #{id}, #{pu.user_id}
+			<if test="dbName != 'mssql'">
+				FROM dual
+			</if>
+		</foreach>
+	</insert>
+	<update id="update">
+		UPDATE oa_product SET 	
+			name = #{name},
+			update_by = #{updateById},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete">
+		UPDATE oa_product SET
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<update id="deletePUser">
+		DELETE FROM oa_product_users
+		WHERE product_id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosNumberUnInfoDao">
+    
+	<sql id="oaEosNumberUnInfoColumns">
+		a.id AS "id",
+		a.un_number_id AS "unNumberId",
+		a.item_number AS "itemNumber",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaEosNumberUnInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="OaEosNumberUnInfo">
+		SELECT 
+			<include refid="oaEosNumberUnInfoColumns"/>
+		FROM oa_eos_number_un_info a
+		<include refid="oaEosNumberUnInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+    <select id="getMaxCode" resultType="OaEosNumberUnInfo">
+        SELECT
+        <include refid="oaEosNumberUnInfoColumns"/>
+        FROM oa_eos_number_un_info a
+        <include refid="oaEosNumberUnInfoJoins"/>
+        WHERE a.un_number_id= #{unNumberId} order by a.create_date DESC limit 0,1
+    </select>
+	<select id="findList" resultType="OaEosNumberUnInfo">
+		SELECT 
+			<include refid="oaEosNumberUnInfoColumns"/>
+		FROM oa_eos_number_un_info a
+		<include refid="oaEosNumberUnInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.un_number_id= #{unNumberId}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="OaEosNumberUnInfo">
+		SELECT 
+			<include refid="oaEosNumberUnInfoColumns"/>
+		FROM oa_eos_number_un_info a
+		<include refid="oaEosNumberUnInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_eos_number_un_info(
+			id,
+			un_number_id,
+			item_number,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{unNumberId},
+			#{itemNumber},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_number_un_info SET 	
+			un_number_id = #{unNumberId},
+			item_number = #{itemNumber},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_eos_number_un_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

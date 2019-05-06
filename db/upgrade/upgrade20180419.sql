@@ -1,0 +1,1 @@
+alter table oa_contract_terms add Column `index` int(64) NOT NULL COMMENT '自编号';

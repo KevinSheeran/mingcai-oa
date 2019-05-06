@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.OaProductTaskLogDao">
+    
+	<sql id="oaProductTaskLogColumns">
+		a.id AS "id",
+		a.task_id AS "taskId",
+		a.task_to_user_id AS "taskToUserId",
+		a.task_status AS "taskStatus",
+		a.prodcut_end_date AS "prodcutEndDate",
+		a.create_by AS "createBy.id",
+		u3.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.remarks AS "remarks",
+		a.task_type as "taskType",
+		a.code as "code",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaProductTaskLogJoins">
+		LEFT JOIN sys_user u3 ON u3.id = a.create_by
+	</sql>
+    
+	<select id="get" resultType="OaProductTaskLog">
+		SELECT 
+			<include refid="oaProductTaskLogColumns"/>
+		FROM oa_product_task_log a
+		<include refid="oaProductTaskLogJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	<select id="getLast" resultType="OaProductTaskLog">
+		SELECT
+		<include refid="oaProductTaskLogColumns"/>
+		FROM oa_product_task_log a
+		<include refid="oaProductTaskLogJoins"/>
+		WHERE a.task_id = #{taskId} and task_type=2 order by a.create_date DESC
+		Limit 0,1
+	</select>
+	<select id="findList" resultType="OaProductTaskLog">
+		SELECT 
+			<include refid="oaProductTaskLogColumns"/>
+		FROM oa_product_task_log a
+		<include refid="oaProductTaskLogJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+			and a.task_id = #{taskId} and a.task_type=2
+		order by a.create_date DESC
+	</select>
+	
+	<select id="findAllList" resultType="OaProductTaskLog">
+		SELECT 
+			<include refid="oaProductTaskLogColumns"/>
+		FROM oa_product_task_log a
+		<include refid="oaProductTaskLogJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_product_task_log(
+			id,
+			task_id,
+			task_to_user_id,
+			task_status,
+			prodcut_end_date,
+			create_by,
+			create_date,
+			remarks,
+			task_type,
+			code,
+			del_flag
+		) VALUES (
+			#{id},
+			#{taskId},
+			#{taskToUserId},
+			#{taskStatus},
+			#{prodcutEndDate},
+			#{createBy.id},
+			#{createDate},
+			#{remarks},
+			#{taskType},
+			#{code},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_product_task_log SET 	
+			task_id = #{taskId},
+			task_to_user_id = #{taskToUserId},
+			task_status = #{taskStatus},
+			prodcut_end_date = #{prodcutEndDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_product_task_log SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

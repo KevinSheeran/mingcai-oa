@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.OaProductTaskDao">
+    
+	<sql id="oaProductTaskColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.product_id AS "productId",
+		a.task_to_user_id AS "taskUser.id",
+		u3.name AS "taskUser.name",
+		u3.photo as "taskUser.photo",
+		a.task_status AS "taskStatus",
+		a.prodcut_end_date AS "prodcutEndDate",
+		a.create_by AS "createBy.id",
+		u4.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaProductTaskJoins">
+		LEFT JOIN sys_user u3 ON u3.id = a.task_to_user_id
+		LEFT JOIN sys_user u4 ON u4.id = a.create_by
+	</sql>
+	<sql id="oaProductJoins">
+		LEFT JOIN oa_product pro ON pro.id = a.product_id
+	</sql>
+	<select id="get" resultType="OaProductTask">
+		SELECT 
+			<include refid="oaProductTaskColumns"/>
+		FROM oa_product_task a
+		<include refid="oaProductTaskJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaProductTask">
+		SELECT 
+			<include refid="oaProductTaskColumns"/>
+		FROM oa_product_task a
+		<include refid="oaProductTaskJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+				OR u3.name LIKE concat('%',#{name},'%')
+			</if>
+
+			<if test="page !=null and createBy != null and createBy != ''">
+                  AND  a.task_status !=2
+			</if>
+			<if test="taskStatus != null and taskStatus != ''">
+				AND a.task_status = #{taskStatus}
+			</if>
+			<if test="productId != null and productId != ''">
+				AND a.product_id = #{productId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.task_status asc ,a.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListByUser" resultType="OaProductTask">
+		SELECT
+		<include refid="oaProductTaskColumns"/>,
+		pro.name as "productName"
+		FROM oa_product_task a
+		<include refid="oaProductTaskJoins"/>
+		<include refid="oaProductJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE
+				<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="taskStatus != null and taskStatus != ''">
+				AND a.task_status = #{taskStatus}
+			</if>
+			<if test="productId != null and productId != ''">
+				AND a.product_id = #{productId}
+			</if>
+			<if test="taskUser != null and taskUser != ''">
+				AND a.task_to_user_id = #{taskUser.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.task_status asc ,a.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findAllList" resultType="OaProductTask">
+		SELECT 
+			<include refid="oaProductTaskColumns"/>
+		FROM oa_product_task a
+		<include refid="oaProductTaskJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="createBy != null and createBy != ''">
+                AND a.task_to_user_id = #{createBy.id}
+                    AND  a.task_status !=2
+            </if>
+			AND a.product_id = #{productId}
+		</where>		
+		  ORDER BY a.update_date DESC
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_product_task(
+			id,
+			name,
+			product_id,
+			task_to_user_id,
+			task_status,
+			prodcut_end_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{productId},
+			#{taskUser.id},
+			#{taskStatus},
+			#{prodcutEndDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	<select id="countUnTask" resultType="int">
+		SELECT
+		count(*)
+		FROM oa_product_task a
+		<where>
+			a.product_id =#{productId}
+			AND
+			a.task_status =0
+		</where>
+	</select>
+	<select id="countUserUnTask" resultType="int">
+		SELECT
+		count(*)
+		FROM oa_product_task a
+		<where>
+			a.task_to_user_id =#{userId}
+			AND
+			a.task_status =0
+		</where>
+	</select>
+
+	<update id="update">
+		UPDATE oa_product_task SET 	
+			name = #{name},
+			product_id = #{productId},
+			task_to_user_id = #{taskUser.id},
+			task_status = #{taskStatus},
+			prodcut_end_date = #{prodcutEndDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_product_task SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

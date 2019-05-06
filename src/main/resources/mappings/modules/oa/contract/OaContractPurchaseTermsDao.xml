@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.contract.OaContractPurchaseTermsDao">
+    
+	<sql id="oaContractPurchaseTermsColumns">
+		a.id AS "id",
+		a.purchase_id AS "purchaseId",
+		a.trem_id AS "tremId",
+		a.number AS "number",
+		a.unit_price AS "unitPrice",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		b.specifications as "specifications",
+		b.name as "name",
+		b.number as "pnumber",
+		b.unit as "unit",
+		b.code as "code",
+		b.type as "type",
+		a.s_product_id as "productId",
+		c.name as "pname",
+		d.name as "sname"
+	</sql>
+	<sql id="oaContractPurchaseTermsJoins">
+		left join oa_contract_terms b on a.trem_id = b.id
+		left join oa_contract_purchase_info c on c.id= a.purchase_id
+		left join oa_contract_services_info d on d.id= a.purchase_id
+	</sql>
+    
+	<select id="get" resultType="OaContractPurchaseTerms">
+		SELECT 
+			<include refid="oaContractPurchaseTermsColumns"/>
+		FROM oa_contract_purchase_terms a
+		<include refid="oaContractPurchaseTermsJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getTremList" resultType="OaContractPurchaseTerms">
+		SELECT
+		<include refid="oaContractPurchaseTermsColumns"/>
+		FROM oa_contract_purchase_terms a
+		<include refid="oaContractPurchaseTermsJoins"/>
+		WHERE a.trem_id = #{id}
+	</select>
+	<select id="findTremsList" resultType="OaContractPurchaseTerms">
+		SELECT
+		d.id as "tremId",
+		d.name as "name",
+		d.code as "code",
+		d.`number` as "number",
+		d.`unit` as "unit",
+		d.`unit_price` as "unitPrice",
+		e.`pt_id` as "id",
+		e.number AS `pnumber`,
+		e.unit_price as "punitPrice"
+		FROM `oa_contract_terms` d
+		LEFT JOIN (
+		SELECT a.id,b.id AS `pt_id`,b.`number`,b.`unit_price`
+		FROM `oa_contract_terms` a
+		LEFT JOIN `oa_contract_purchase_terms` b ON a.id=b.`trem_id`
+		WHERE  b.purchase_id=#{purchaseId} and a.del_flag = #{DEL_FLAG_NORMAL} and b.del_flag = #{DEL_FLAG_NORMAL}) AS e
+		ON d.`id`=e.id left join (select id,fin_product_id from oa_contract_info where fin_product_id= #{finProductId}) as f on f.id=d.contract_id
+		where d.del_flag = #{DEL_FLAG_NORMAL} and f.fin_product_id=#{finProductId}
+		order by d.id asc
+	</select>
+	<select id="countNumber" resultType="OaContractPurchaseTerms">
+		SELECT
+		sum(a.number) as "countNumber"
+		FROM `oa_contract_purchase_terms` a
+		where a.del_flag = #{DEL_FLAG_NORMAL} and a.trem_id=#{tremId}
+		<if test="purchaseId!=null and purchaseId!=''">
+			and a.purchase_id!=#{purchaseId}
+		</if>
+	</select>
+	<select id="sumMoney" resultType="OaContractPurchaseTerms">
+		SELECT
+		sum(a.number*a.unit_price) as "money"
+		FROM `oa_contract_purchase_terms` a
+		where a.del_flag = #{DEL_FLAG_NORMAL}
+		<if test="finProductId!=null and finProductId!=''">
+			and a.fin_product_id=#{finProductId}
+		</if>
+	</select>
+	<select id="findList" resultType="OaContractPurchaseTerms">
+		SELECT 
+			<include refid="oaContractPurchaseTermsColumns"/>
+		FROM oa_contract_purchase_terms a
+		<include refid="oaContractPurchaseTermsJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL} and b.del_flag = #{DEL_FLAG_NORMAL}
+			and a.purchase_id=#{purchaseId}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="OaContractPurchaseTerms">
+		SELECT 
+			<include refid="oaContractPurchaseTermsColumns"/>
+		FROM oa_contract_purchase_terms a
+		<include refid="oaContractPurchaseTermsJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			and a.purchase_id=#{a.purchaseId}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_contract_purchase_terms(
+			purchase_id,
+			trem_id,
+			number,
+			unit_price,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			s_product_id,
+			fin_product_id
+		) VALUES (
+			#{purchaseId},
+			#{tremId},
+			#{number},
+			#{unitPrice},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{productId},
+			#{finProductId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_contract_purchase_terms SET 	
+			purchase_id = #{purchaseId},
+			trem_id = #{tremId},
+			number = #{number},
+			unit_price = #{unitPrice},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			s_product_id = #{productId}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		delete from oa_contract_purchase_terms
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

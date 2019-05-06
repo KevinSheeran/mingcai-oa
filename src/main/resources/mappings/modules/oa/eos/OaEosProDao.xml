@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.eos.OaEosProDao">
+    
+	<sql id="oaEosProColumns">
+
+		a.id AS "id",
+		a.name AS "name",
+		a.flow_id AS "flow.id",
+		a.pa_number AS "paNumber",
+		a.pro_number AS "proNumber",
+		a.person_liable_user AS "personLiableUser.id",
+		owu.avatar AS "personLiableUser.wxUsers.avatar",
+		u5.name AS "personLiableUser.name",
+		a.customer_name AS "customerName",
+		a.customer_user AS "customerUser",
+		a.customer_contact_information AS "customerContactInformation",
+		a.real_input_estimation/100 as "realInputEstimation",
+		a.status AS "status",
+		a.pro_type AS "proType",
+		a.pro_location AS "proLocation",
+		a.pro_capital_source AS "proCapitalSource",
+		a.pro_budget AS "proBudget",
+		a.pro_cycle AS "proCycle",
+		a.pro_content AS "proContent",
+		a.estimated_amount/10000 AS "estimatedAmount",
+		a.gross_profit_margin AS "grossProfitMargin",
+		a.input_estimation/10000 AS "inputEstimation",
+		a.workload AS "workload",
+		a.user_ids AS "userIds",
+		a.to_examine AS "toExamine",
+		a.approval AS "approval",
+		a.create_by AS "createBy.id",
+		b.name AS "createBy.name",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks",
+		c.id as "oaEosProTimetotal.id",
+        c.ps_total as "oaEosProTimetotal.psTotal",
+        c.sale_total as "oaEosProTimetotal.saleTotal",
+        c.rd_total as "oaEosProTimetotal.rdTotal"
+	</sql>
+
+
+	<sql id="oaEosProJoins">
+		LEFT JOIN sys_user u5 ON u5.id = a.person_liable_user
+		LEFT JOIN sys_user b ON b.id = a.create_by
+		left join oa_eos_pro_timetotal c on c.id=a.id
+		LEFT JOIN oa_wx_users owu ON owu.mobile = u5.mobile
+	</sql>
+	<sql id="oaEosProInnerJoins">
+		INNER JOIN oa_eos_pro_item b
+		ON a.pa_number=b.eos_id
+		INNER JOIN oa_wx_extended c
+		ON b.eos_z_id=c.pro_id
+	</sql>
+
+	<select id="get" resultType="OaEosPro">
+		SELECT 
+			<include refid="oaEosProColumns"/>
+		FROM oa_eos_pro a
+		<include refid="oaEosProJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+
+	<select id="findListByFlowFinishUser" resultType="OaEosPro">
+		SELECT
+		<include refid="oaEosProColumns"/>,
+		flow.create_date as "flow.createDate"
+		FROM oa_eos_pro a
+		<include refid="oaEosProJoins"/>
+		LEFT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND flow.user_id=#{userId}  and (flow.status=1 or flow.status=-1)
+		</where>
+		group by a.id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY flow.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListByUser" resultType="OaEosPro">
+		SELECT
+		<include refid="oaEosProColumns"/>,
+			  flow.create_date as "flow.createDate"
+		FROM oa_eos_pro a
+		<include refid="oaEosProJoins"/>
+		RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND flow.user_id=#{userId} and a.status=2 and flow.status=0
+
+		</where>
+		group by a.id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY flow.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListByPersonLiableUser" resultType="OaEosPro">
+		SELECT
+		<include refid="oaEosProColumns"/>,
+		start.contract_amount/100 as "start.contractAmount",
+		start.real_input_estimation/100 as "start.realInputEstimation",
+		start.status as "start.status",
+		sett.settlement/100 as "oaUserProSettlement.settlement",
+		sett.expenditure/100 as "oaUserProSettlement.expenditure"
+		FROM oa_eos_pro a
+		<include refid="oaEosProJoins"/>
+		LEFT JOIN oa_eos_pro_start start ON start.id = a.id
+		left join oa_user_pro_settlement sett on sett.pro_id = a.id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND a.person_liable_user=#{personLiableUser.id}
+			AND a.status>2
+		</where>
+		group by a.id
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date desc
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findList" resultType="OaEosPro">
+		SELECT
+		<include refid="oaEosProColumns"/>
+		FROM oa_eos_pro a
+		<include refid="oaEosProJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="!leader">
+				AND (a.update_by = #{userId} OR  a.create_by = #{userId} OR  a.person_liable_user = #{userId})
+			</if>
+
+			<if test="name != null and name != ''">
+				AND (a.name LIKE
+				concat('%',#{name},'%') or a.pa_number LIKE
+				concat('%',#{name},'%') or a.pro_number LIKE
+				concat('%',#{name},'%'))
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findAllList" resultType="OaEosPro">
+		SELECT 
+			<include refid="oaEosProColumns"/>
+		FROM oa_eos_pro a
+		<include refid="oaEosProJoins"/>
+		<where>
+			a.del_flag = 0
+			AND pa_number IS NOT NULL
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO oa_eos_pro(
+			id,
+			name,
+			pa_number,
+			pro_number,
+			person_liable_user,
+			customer_name,
+			customer_user,
+			customer_contact_information,
+			status,
+			pro_type,
+			pro_location,
+			pro_capital_source,
+			pro_budget,
+			pro_cycle,
+			pro_content,
+			estimated_amount,
+			gross_profit_margin,
+			input_estimation,
+			workload,
+			user_ids,
+			to_examine,
+			approval,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			real_input_estimation
+		) VALUES (
+			#{id},
+			#{name},
+			#{paNumber},
+			#{proNumber},
+			#{personLiableUser.id},
+			#{customerName},
+			#{customerUser},
+			#{customerContactInformation},
+			#{status},
+			#{proType},
+			#{proLocation},
+			#{proCapitalSource},
+			#{proBudget},
+			#{proCycle},
+			#{proContent},
+			#{estimatedAmount}*10000,
+			#{grossProfitMargin},
+			#{inputEstimation}*10000,
+			#{workload},
+			#{userIds},
+			#{toExamine},
+			#{approval},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{realInputEstimation}*100
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_eos_pro SET 	
+			name = #{name},
+			pa_number = #{paNumber},
+			flow_id = #{flow.id},
+			pro_number = #{proNumber},
+			person_liable_user = #{personLiableUser.id},
+			customer_name = #{customerName},
+			customer_user = #{customerUser},
+			customer_contact_information = #{customerContactInformation},
+			status = #{status},
+			pro_type = #{proType},
+			pro_location = #{proLocation},
+			pro_capital_source = #{proCapitalSource},
+			pro_budget = #{proBudget},
+			pro_cycle = #{proCycle},
+			pro_content = #{proContent},
+			estimated_amount = #{estimatedAmount},
+			gross_profit_margin = #{grossProfitMargin},
+			input_estimation = #{inputEstimation},
+			workload = #{workload},
+			user_ids = #{userIds},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			real_input_estimation=#{realInputEstimation}*100
+		WHERE id = #{id}
+	</update>
+    <update id="updateAudit">
+        UPDATE oa_eos_pro SET
+        status = #{status},
+        flow_id = #{flow.id},
+        pa_number = #{paNumber},
+        pro_number = #{proNumber}
+        WHERE id = #{id}
+    </update>
+	<update id="delete">
+		DELETE FROM oa_eos_pro
+		WHERE id = #{id}
+	</update>
+
+	<select id="selByprozid" resultType="OaEosPro">
+		SELECT
+		<include refid="oaEosProColumns"/>
+		FROM oa_eos_pro a
+		<include refid="oaEosProJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="paNumber != null and paNumber != ''">
+				AND a.pa_number = #{paNumber}
+			</if>
+			<if test="proNumber != null and proNumber != ''">
+				AND a.pro_number = #{proNumber}
+			</if>
+				and  a.id  = #{id}
+		</where>
+	</select>
+	<select id="index" resultType="pd">
+		SELECT (SELECT COUNT(distinct a.id) FROM oa_eos_pro a RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id WHERE a.del_flag = 0 AND flow.user_id= #{userId} AND a.status=2 AND flow.status=0 and flow.send_status=1) AS procount,
+		(SELECT COUNT(distinct a.id) FROM oa_eos_pro_un a RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id WHERE a.del_flag = 0 AND flow.user_id= #{userId} AND a.status=1 AND flow.status=0 and flow.send_status=1) AS prouncount,
+		(SELECT COUNT(distinct a.id) FROM oa_eos_pro_start a RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id WHERE a.del_flag = 0 AND flow.user_id= #{userId} AND a.status=1 AND flow.status=0 and flow.send_status=1) AS prostartcount,
+		(SELECT COUNT(distinct a.id) FROM oa_wx_extended_super a RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id left join oa_eos_pro pro ON pro.id=a.pro_id  WHERE a.del_flag = 0 AND flow.user_id= #{userId} AND a.state=0 AND flow.status=0 AND rbs_type=0 and flow.send_status=1) AS extendedcount,
+		(SELECT COUNT(distinct a.id) FROM oa_wx_extended_super a RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id left join oa_eos_pro pro ON pro.id=a.pro_id  WHERE a.del_flag = 0 AND flow.user_id= #{userId} AND a.state=0 AND flow.status=0 AND rbs_type=1 and flow.send_status=1) AS extendedcount1,
+		(SELECT COUNT(distinct a.id) FROM oa_user_account a RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id   WHERE a.del_flag = 0 AND flow.user_id= #{userId} AND a.status=1 AND flow.status=0 AND a.flag=0 and flow.send_status=1) AS accountcount,
+		(select count(distinct a.id) from oa_wx_extended_super a WHERE a.del_flag = 0 and a.state=1  AND a.appropriation =0 and rbs_type=0 )	 AS appropriationcount,
+		(select count(distinct a.id) from oa_wx_extended_super a WHERE a.del_flag = 0 and a.state=1  AND a.appropriation =0 and rbs_type=1)	 AS appropriationcount1
+	</select>
+    <select id="procount" resultType="pd">
+       select (select count(id) from oa_eos_pro where status>2 and del_flag ='0') as 'pacount',
+        (select sum(estimated_amount) from oa_eos_pro where status>2 and del_flag ='0') as 'pasum',
+        (select count(id) from oa_eos_pro_start where status=2 and del_flag ='0') as 'procount',
+        (select sum(contract_amount)/100 from oa_eos_pro_start where status=2 and del_flag ='0') as 'prosum'
+    </select>
+
+
+	<update id="updatamoney">
+			UPDATE oa_eos_pro SET
+			real_input_estimation = #{realInputEstimation}*100
+			WHERE id = #{id}
+	</update>
+</mapper>

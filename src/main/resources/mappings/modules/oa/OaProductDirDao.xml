@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.OaProductDirDao">
+    
+	<sql id="oaProductDirColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.product_id AS "productId",
+		a.dir_path AS "dirPath",
+		a.parent_id AS "parent.id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaProductDirJoins">
+	</sql>
+    
+	<select id="get" resultType="OaProductDir">
+		SELECT 
+			<include refid="oaProductDirColumns"/>
+		FROM oa_product_dir a
+		<include refid="oaProductDirJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaProductDir">
+		SELECT 
+			<include refid="oaProductDirColumns"/>
+		FROM oa_product_dir a
+		<include refid="oaProductDirJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="productId != null and productId != ''">
+				AND a.product_id = #{productId}
+			</if>
+			<if test="parent != null and parent.id != null and parent.id != ''">
+				AND a.parent_id = #{parent.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaProductDir">
+		SELECT 
+			<include refid="oaProductDirColumns"/>
+		FROM oa_product_dir a
+		<include refid="oaProductDirJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_product_dir(
+			id,
+			name,
+			product_id,
+			dir_path,
+			parent_id,
+			create_by,
+			create_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{productId},
+			#{dirPath},
+			#{parent.id},
+			#{createBy.id},
+			#{createDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_product_dir SET 	
+			name = #{name},
+			product_id = #{productId},
+			dir_path = #{dirPath},
+			parent_id = #{parent.id}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_product_dir SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
