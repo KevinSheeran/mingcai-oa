@@ -85,33 +85,32 @@
                 mui('#pullrefresh').pullRefresh().endPullupToRefresh((pageNo*pageSize >=data.count)); //参数为true代表没有更多数据了。
                 pageNo++;
                 for(var j=0;j<fimdlist.length;j++){
-                    var item= fimdlist[j].map;
-                    for (var i=0;i<item.length;i++) {
-                        var model=$($("#model").html());
-                        model.find(".a").html("￥"+item[i].cost);
-                        model.find(".c").html(item[i].proName);
-                        if(item[i].type=='bm'){
-                            model.find(".c1").html("部门名")
-                            model.find(".type").html("部门报销")
-                        }else if(item[i].type=='ylx'){
-                            model.find(".type").html("预立项报销")
-                        }else if(item[i].type=='lx'){
-                            model.find(".type").html("立项报销")
-                        }else if(item[i].type=='fxs'){
-                            model.find(".type").html("非销售立项报销")
-                        }
-                        model.find(".d").html(item[i].user.name);
-                        model.find(".f").html(item[i].crdate);
-                        model.find(".g").html(item[i].state);
-                        model.find(".i").attr("path","/oa/weixin/two/Details?idss="+item[i].id+"&type="+item[i].type+"&sh=1")
-                        model.find(".i").text("查看详情")
-                        if (item[i].state != "待审核") {
-                            model.find(".h").remove();
-                        } else {
-                            model.find(".h").attr("path", item[i].id);
-                        }
-                        $(".uls").append(model.fadeIn(500));
+                    var obj=fimdlist[j];
+                    var item= fimdlist[j].objmap;
+                    var model=$($("#model").html());
+                    model.find(".a").html("￥"+item.cost);
+                    model.find(".c").html(item.proName);
+                    if(item.type=='bm'){
+                        model.find(".c1").html("部门名")
+                        model.find(".type").html("部门报销")
+                    }else if(item.type=='ylx'){
+                        model.find(".type").html("预立项报销")
+                    }else if(item.type=='lx'){
+                        model.find(".type").html("立项报销")
+                    }else if(item.type=='fxs'){
+                        model.find(".type").html("非销售立项报销")
                     }
+                    model.find(".d").html(item.user.name);
+                    model.find(".f").html(item.crdate);
+                    model.find(".g").html(item.state);
+                    model.find(".i").attr("path","/oa/weixin/two/fxsDetails?id="+obj.id)
+                    model.find(".i").text("查看详情")
+                    if (item.state != "待审核") {
+                        model.find(".h").remove();
+                    } else {
+                        model.find(".h").attr("path", obj.id);
+                    }
+                    $(".uls").append(model.fadeIn(500));
                 }
             })
         }
@@ -126,7 +125,7 @@
             mui.confirm('确认撤销报销申请吗？', '系统提示', btnArray, function (e) {
                 if (e.index == 1) {
 
-                    $.get("${oa}/weixin/two/delbx/", "eosid=" + $this.attr("path"), function (data) {
+                    $.get("${oa}/weixin/two/delbx", "eosid=" + $this.attr("path"), function (data) {
                         data = JSON.parse(data);
                         if (data.success) {
                             mui.toast('撤销成功！');

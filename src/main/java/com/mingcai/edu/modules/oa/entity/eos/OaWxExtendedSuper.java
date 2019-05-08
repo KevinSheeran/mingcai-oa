@@ -8,8 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import com.mingcai.edu.common.persistence.DataEntity;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 报销主表Entity
@@ -26,8 +25,8 @@ public class OaWxExtendedSuper extends DataEntity<OaWxExtendedSuper> {
 	private  String rbsType;
 	private String enclosure;		// 附件
 	private OaEosPro pro;
-	private List<Map> mapList;
-	private List<OaWxExtended> list;
+	private List<Map> mapList=new ArrayList<Map>();
+	private List<OaWxExtended> list=new ArrayList<OaWxExtended>();
 	public List<Map> getMapList() {
 		return mapList;
 	}
@@ -35,9 +34,44 @@ public class OaWxExtendedSuper extends DataEntity<OaWxExtendedSuper> {
 	private OaWxDepartment oaWxDepartment;
 	private OaEosProUn oaEosProUn;
 	private String userId;
-
+	private Map<String,Object> objmap= new HashMap<String, Object>();
+	private boolean cw=false; //是否为财务查询
+	private String starttime;
+	private String endtime;
 	public String getUserId() {
 		return userId;
+	}
+
+	public Map<String, Object> getObjmap() {
+		return objmap;
+	}
+
+	public String getStarttime() {
+		return starttime;
+	}
+
+	public void setStarttime(String starttime) {
+		this.starttime = starttime;
+	}
+
+	public String getEndtime() {
+		return endtime;
+	}
+
+	public void setEndtime(String endtime) {
+		this.endtime = endtime;
+	}
+
+	public boolean isCw() {
+		return cw;
+	}
+
+	public void setCw(boolean cw) {
+		this.cw = cw;
+	}
+
+	public void setObjmap(Map<String, Object> objmap) {
+		this.objmap = objmap;
 	}
 
 	public void setUserId(String userId) {

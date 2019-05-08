@@ -52,10 +52,10 @@
 				</tr>
 			</c:if>
 			<c:if test="${oaUserAccount!=null&&oaUserAccount.id!=null}">
-				<td>年销售额度：￥${fns:formatNumber(oaUserAccount.salesVolumeId!=null?oaUserAccount.salesVolumeId.salesVolume:0)}元</td>
-				<td>每月可用额度：￥${fns:formatNumber(oaUserAccount.branchQuota)}元(使用销售额比例 ${oaUserAccount.salesVolumeId.uotaRatio}%)</td>
-				<td>本月已用额度：￥${fns:formatNumber(oaUserAccount.costIncurred)}元</td>
-				<td>资金池额度：￥${fns:formatNumber(oaUserAccount.poolFunds)}元</td>
+				<td>年销售额：￥${fns:formatNumber(oaUserAccount.salesVolumeId!=null?oaUserAccount.salesVolumeId.salesVolume:0)}元</td>
+				<td>每月可用额：￥${fns:formatNumber(oaUserAccount.branchQuota)}元(按照售额比例 ${oaUserAccount.salesVolumeId.uotaRatio}%)</td>
+				<td>本月已用额：￥${fns:formatNumber(oaUserAccount.costIncurred)}元</td>
+				<td>资金池额：￥${fns:formatNumber(oaUserAccount.poolFunds)}元</td>
 			</c:if>
 			<c:if test="${oaUserAccount!=null&&oaUserAccount.leader&&oaUserAccount.salesVolumeId!=null&&oaUserAccount.flag=='0'}">
 				<td><button type="button" class="btn btn-primary" onclick="frozenAccount('${oaUserAccount.id}');">冻结账户</button></td>

@@ -40,33 +40,41 @@
                 ${user.name}
             </div>
         </div>
+        <div class="weui-cell">
+            <div class="weui-cell__bd">
+                <p>报销总金额</p>
+            </div>
+            <div class="weui-cell__ft lx" path="bm">
+                ￥${cost}元
+            </div>
+        </div>
        <div class="weui-cell">
             <div class="weui-cell__bd">
                <p>项目编号</p>
             </div>
-            <div class="weui-cell__ft lx" path="${map.oaWxExtendedSuper.id}">
+            <div class="weui-cell__ft lx" path="${oweSuper.id}">
                <%-- <c:choose>
-                    <c:when test="${map.pro.paNumber !=null and map.pro.proNumber == null  or map.pro.proNumber == ''}">
-                        ${map.pro.paNumber}
+                    <c:when test="${oweSuper.pro.paNumber !=null and map.pro.proNumber == null  or map.pro.proNumber == ''}">
+                        ${oweSuper.pro.paNumber}
                     </c:when>
-                    <c:when test="${map.pro.proNumber !=null ||map.pro.proNumber !=''}">
-                        ${map.pro.proNumber}
+                    <c:when test="${oweSuper.pro.proNumber !=null ||map.pro.proNumber !=''}">
+                        ${oweSuper.pro.proNumber}
                     </c:when>
                 </c:choose>--%>
-                   ${map.un.proNumber}
+                   ${oweSuper.oaEosProUn.proNumber}
             </div>
         </div>
           <div class="weui-cell">
               <div class="weui-cell__bd">
                  <p>项目名</p>
               </div>
-              <div class="weui-cell__ft">${map.un.name}</div>
+              <div class="weui-cell__ft">${oweSuper.oaEosProUn.name}</div>
           </div>
           <div class="weui-cell">
               <div class="weui-cell__bd">
                  <p>财务部门</p>
               </div>
-              <div class="weui-cell__ft">${map.oaWxExtendedSuper.appropriation eq 1 ?"已拨款":map.oaWxExtendedSuper.appropriation eq 0 ?"未拨款":map.oaWxExtendedSuper.appropriation eq 2?"审核未通过":"系统异常请联系系统管理员"}</div>
+              <div class="weui-cell__ft">${oweSuper.appropriation eq 1 ?"已拨款":oweSuper.appropriation eq 0 ?"未拨款":oweSuper.appropriation eq 2?"审核未通过":"系统异常请联系系统管理员"}</div>
           </div>
             <div class="weui-cell">
                 <div class="weui-cell__bd">
@@ -78,24 +86,18 @@
                 <div class="weui-cell__bd">
                    <p>申请时间</p>
                 </div>
-                <div class="weui-cell__ft"><fmt:formatDate value="${map.createDate}" pattern="yyyy-MM-dd HH:mm:ss"/></div>
+                <div class="weui-cell__ft"><fmt:formatDate value="${oweSuper.createDate}" pattern="yyyy-MM-dd HH:mm:ss"/></div>
             </div>
     </div>
-    <c:forEach items="${map.oaWxBxCorrelations}" var="it" varStatus="sta">
+    <c:forEach items="${oweSuper.list}" var="it" varStatus="sta">
         <div class="weui-cells">
             <div class="weui-cell">
                 <div class="weui-cell__bd">
-                   <p>报销阶段</p>
+                   <p>子项目</p>
                 </div>
                 <div class="weui-cell__ft zid">
-                    ${it.jd.name}
+                    ${it.oaEosProStartItem.name}
                 </div>
-            </div>
-            <div class="weui-cell">
-                <div class="weui-cell__bd">
-                   <p>报销类型</p>
-                </div>
-                <div class="weui-cell__ft">${it.lx.name}</div>
             </div>
             <div class="weui-cell">
                 <div class="weui-cell__bd">
@@ -136,19 +138,19 @@
                 </div>
             </div>
         </c:forEach>
-        <c:if test="${map.oaWxExtendedSuper.appropriation !=0 and map.oaWxExtendedSuper.remarks !=null}">
+        <c:if test="${oweSuper.appropriation !=0 and oweSuper.remarks !=null}">
             <div class="weui-cells__title">财务</div>
             <div class="weui-panel weui-panel_access">
                 <div class="weui-panel__bd">
                     <a href="javascript:void(0);" class="weui-media-box weui-media-box_appmsg">
-                        <c:if test="${map.oaWxExtendedSuper.appropriation==1}"><i class="badge weui-icon-success"></i></c:if>
-                        <c:if test="${map.oaWxExtendedSuper.appropriation==2}"><i class="weui-icon-cancel"></i></c:if>
+                        <c:if test="${oweSuper.appropriation==1}"><i class="badge weui-icon-success"></i></c:if>
+                        <c:if test="${oweSuper.appropriation==2}"><i class="weui-icon-cancel"></i></c:if>
                         <div class="weui-media-box__hd">
-                            <img class="weui-media-box__thumb" src="${map.oaWxExtendedSuper.updateBy.wxUsers.avatar}/100" alt="">
+                            <img class="weui-media-box__thumb" src="${oweSuper.updateBy.wxUsers.avatar}/100" alt="">
                         </div>
                         <div class="weui-media-box__bd">
-                            <h4 class="weui-media-box__title">${map.oaWxExtendedSuper.updateBy.wxUsers.name}</h4>
-                            <p class="weui-media-box__desc">${map.oaWxExtendedSuper.remarks}</p>
+                            <h4 class="weui-media-box__title">${oweSuper.updateBy.wxUsers.name}</h4>
+                            <p class="weui-media-box__desc">${oweSuper.remarks}</p>
                         </div>
                     </a>
                 </div>
@@ -156,7 +158,7 @@
         </c:if>
     </div>
 
-    <c:if test="${flow.status!=null and map.oaWxExtendedSuper.state==0 and sh==0 }">
+    <c:if test="${flow.status!=null and oweSuper.state==0 and sh==0 }">
         <div class="weui-cells__title">意见建议</div>
         <div class="weui-cells">
             <div class="weui-cell">
@@ -168,14 +170,14 @@
         </div>
         <div class="weui-btn-area">
             <a href="javascript:;"
-               class="mui-btn mui-btn-primary mui-btn-block <c:if test="${map.oaWxExtendedSuper.state!=0}"> disabled</c:if>"
-               oeproid="${map.oaWxExtendedSuper.id}" flowid="${flow.id}" id="showIOSDialog">同意</a>
+               class="mui-btn mui-btn-primary mui-btn-block <c:if test="${oweSuper.state!=0}"> disabled</c:if>"
+               oeproid="${oweSuper.id}" flowid="${flow.id}" id="showIOSDialog">同意</a>
             <a href="javascript:;"
-               class="mui-btn mui-btn-warning mui-btn-block <c:if test="${map.oaWxExtendedSuper.state!=0}"> disabled</c:if>"
-               oeproid="${map.oaWxExtendedSuper.id}" flowid="${flow.id}" id="stopIOSDialog">驳回</a>
+               class="mui-btn mui-btn-warning mui-btn-block <c:if test="${oweSuper.state!=0}"> disabled</c:if>"
+               oeproid="${oweSuper.id}" flowid="${flow.id}" id="stopIOSDialog">驳回</a>
         </div>
     </c:if>
-    <c:if test="${map.oaWxExtendedSuper.appropriation eq 0 and ! empty success and map.oaWxExtendedSuper.state==1 and sh==0}">
+    <c:if test="${oweSuper.appropriation eq 0 and  oweSuper.state==1 }">
         <div class="weui-cells__title">意见建议</div>
         <div class="weui-cells">
             <div class="weui-cell">
@@ -186,9 +188,9 @@
             </div>
         </div>
         <div class="weui-btn-area">
-                <a href="javascript:;" class="mui-btn mui-btn-primary mui-btn-block" oeproid="${map.id}"
+                <a href="javascript:;" class="mui-btn mui-btn-primary mui-btn-block" oeproid="${oweSuper.id}"
                    id="showIOSDialogs">同意</a>
-                <a href="javascript:;" class="mui-btn mui-btn-warning mui-btn-block" oeproid="${map.id}"
+                <a href="javascript:;" class="mui-btn mui-btn-warning mui-btn-block" oeproid="${oweSuper.id}"
                    flowid="${flow.id}"
                    id="showIOSDialogs1" >驳回</a>
         </div>

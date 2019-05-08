@@ -65,8 +65,7 @@
     </div>
 </div>
     <div class="mui-card-footer">
-        <button type="button" id="btnExport" class="mui-btn mui-btn-primary mui-btn-block"
-                onclick="sub();">导出
+        <button type="button" id="btnExport" class="mui-btn mui-btn-primary mui-btn-block" >导出
         </button>
     </div>
 </div>

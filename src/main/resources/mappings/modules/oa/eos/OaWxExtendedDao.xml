@@ -148,9 +148,17 @@
 
     <select id="findBylistid" resultType="OaWxExtended">
         SELECT
-        <include refid="oaWxExtendedColumns"/>
+        <include refid="oaWxExtendedColumns"/>,
+		c.id as "jd.id",
+		c.name as "jd.name",
+		d.id as "lx.id",
+		d.name as "lx.name"
         FROM oa_wx_extended a
         <include refid="oaWxExtendedJoins"/>
+		left join oa_wx_bx_correlation b on a.id=b.details_id
+		left join oa_wx_stage_of_reimbursement c on b.stage_id = c.id
+		left join oa_wx_basic_classification_of_reimbursement d on b.classification_id=d.id
+		left join oa_wx_bx_correlation_super e on e.extended_super_id=a.exte_super
         <where>
             a.del_flag = #{DEL_FLAG_NORMAL}
             AND a.exte_super=#{oaWxExtendedSuper.id}
@@ -180,7 +188,6 @@
         <where>
             a.del_flag = #{DEL_FLAG_NORMAL}
             AND a.exte_super=#{oaWxExtendedSuper.id}
-            AND a.pro_id='0'
         </where>
     </select>
     <select id="proCount" resultType="pd">

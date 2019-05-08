@@ -35,7 +35,19 @@ public class OaWxExtendedSuperService extends CrudService<OaWxExtendedSuperDao, 
 	public Page<OaWxExtendedSuper> findPage(Page<OaWxExtendedSuper> page, OaWxExtendedSuper oaWxExtendedSuper) {
 		return super.findPage(page, oaWxExtendedSuper);
 	}
-	
+	public Page<OaWxExtendedSuper> findListUn(Page<OaWxExtendedSuper> page, OaWxExtendedSuper oaWxExtendedSuper){
+		oaWxExtendedSuper.setPage(page);
+		List<OaWxExtendedSuper> list=dao.findListByUser(oaWxExtendedSuper);
+		page.setList(list);
+		return page;
+	}
+	public Page<OaWxExtendedSuper> findFinishListByUser(Page<OaWxExtendedSuper> page, OaWxExtendedSuper oaWxExtendedSuper){
+		oaWxExtendedSuper.setPage(page);
+		List<OaWxExtendedSuper> list=dao.findFinishListByUser(oaWxExtendedSuper);
+		page.setList(list);
+		return page;
+	}
+
 	@Transactional(readOnly = false)
 	public void save(OaWxExtendedSuper oaWxExtendedSuper) {
 		super.save(oaWxExtendedSuper);

@@ -56,7 +56,7 @@ public class User extends DataEntity<User> {
 	private OaWxUsers wxUsers;//微信用户
 	private List<Role> roleList = Lists.newArrayList(); // 拥有角色列表
 	private String userId;
-	private boolean isSale;
+	private boolean isSale;//是否是销售
 	public String getUserId() {
 		return userId;
 	}

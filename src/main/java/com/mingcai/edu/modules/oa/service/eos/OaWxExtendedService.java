@@ -79,6 +79,11 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
      */
     @Value("${financeAuditRole}")
     protected String financeAuditRole;
+    /***
+     * 销售部门id
+     */
+    @Value("${SaleDepartmentId}")
+    protected String SaleDepartmentId;
     @Override
     public OaWxExtended get(String id) {
         return super.get(id);
@@ -86,6 +91,17 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
 
     @Autowired
     public OaUserAccountService accountService;
+
+    @Autowired
+    OaEosProService oaEosProService;
+
+    @Autowired
+    OaEosProStartService oaEosProStartService;
+
+    @Autowired
+    OaEosProUnService oaEosProUnService;
+    @Autowired
+    OaEosProDao oaEosProDao;
     @Override
     public List<OaWxExtended> findList(OaWxExtended oaWxExtended) {
         return super.findList(oaWxExtended);
@@ -117,15 +133,14 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
     @SuppressWarnings("AlibabaTransactionMustHaveRollback")
     @Transactional(rollbackFor = Exception.class, readOnly = false)
     public String saveAudit(OaWxExtendedSuper oaWxExtendedSuper, HttpServletRequest request,String types) {
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuperService2 = oaWxBxCorrelationSuperService.get2(oaWxExtendedSuper.getId());
         String[] group_threes=null;
         String[] group_twos =null;
         String group_two =null;
         String group_three=null;
         /**
-         * 除了销售预立项和销售立项之外其他的都不走管理中心流程
+         * 除了销售预立项和销售立项，销售部门之外其他的都不走管理中心流程
          */
-        if (!"bm".equals(types) || !"fxs".equals(types)){
+        if (!"bm".equals(types)||SaleDepartmentId.equals(request.getParameter("fid")) || !"fxs".equals(types)){
             group_twos = request.getParameterValues("group_two");
              group_two = StringUtils.join(group_twos, ",");
         }
@@ -140,14 +155,14 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
         if (StringUtils.isNotEmpty(audits[0])) {
             TreeMap<Integer, String> flowmap = new TreeMap<Integer, String>();
             flowmap.put(0, group_one);
-            if (!"bm".equals(types) && !"fxs".equals(types)){
+            if (!"bm".equals(types) && !"fxs".equals(types)||SaleDepartmentId.equals(request.getParameter("fid")) ){
                 flowmap.put(1, group_two);
             }
             flowmap.put(2, group_three);
             Map<String, Object> paramMap = new HashMap<String, Object>();
             paramMap.put("type", 1);
             User user1 = userDao.get(oaWxExtendedSuper.getCreateBy().getId());
-            String content = "您有新的报销信息需要审批，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2fDetails%3Fidss%3D" + oaWxBxCorrelationSuperService2.getId() +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+0+"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+            String content = "您有新的非销售报销需要审批，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2ffxsDetails%3Fid%3D" +oaWxExtendedSuper.getId() +"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
             paramMap.put("flowName", "报销流程");
             Map<String, String> returnMap = new HashMap<String, String>();
             returnMap = oefiService.createFlow(flowmap, paramMap);
@@ -192,7 +207,7 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
             Map<String, Object> paramMap = new HashMap<String, Object>();
             paramMap.put("type", 1);
             User user1 = userDao.get(oaWxExtendedSuper.getCreateBy().getId());
-            String content = "您有新的报销信息需要审批，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2fbx%2fDetails%3Fidss%3D" + oaWxExtendedSuper.getId() +"%26type%3D"+oaWxExtendedSuper.getProItemType() +"%26sh%3D"+0+"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+            String content = "您有新的报销需要审批，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2fbx%2fDetails%3Fidss%3D" + oaWxExtendedSuper.getId() +"%26type%3D"+oaWxExtendedSuper.getProItemType() +"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
             paramMap.put("flowName", "报销流程");
             Map<String, String> returnMap = new HashMap<String, String>();
             returnMap = oefiService.createFlow(flowmap, paramMap);
@@ -227,13 +242,13 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
     @Transactional(rollbackFor = Exception.class, readOnly = false)
     public boolean AuditPro(String proid, String flowid, String content,String stop) {
         OaWxExtendedSuper oaWxExtendedSuper1=new OaWxExtendedSuper();
-        OaWxExtendedSuper oaWxExtendedSuper=oaWxExtendedSuperService1.get(proid);
+        OaWxExtendedSuper oaWxExtendedSuper=oaWxExtendedSuperService.get(proid);
         Map<String, String> returnmap=null;
         OaWxExtendedSuper byid =null;
         oaWxExtendedSuper1.setId(proid);
          byid = oaWxExtendedSuperService.findByid(oaWxExtendedSuper1);
             User user1 = userDao.get(oaWxExtendedSuper.getCreateBy().getId());
-        String message = "您有新的报销信息需要审批，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2fbx%2fDetails%3Fidss%3D" + byid.getId() +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+0+"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+        String message = "您有新的报销需要审批，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2ffxsDetails%3Fid%3D" +oaWxExtendedSuper.getId() +"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
         String finishmessage = "";//"报销信息审批完成。\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2fbx%2Details?idss=" + byid.getId() + "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
         returnmap = oefiService.auditFlow(flowid, true, message, finishmessage, content);
         if (!"true".equals(returnmap.get("success"))) {
@@ -263,7 +278,7 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
                     if (sb.length() > 0) {
                         sb.deleteCharAt(sb.length() - 1);
                     }
-                    String message1 = "报销信息审批完成请确认拨款。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2fbx%2fDetails%3Fidss%3D" + byid.getId() +"%26success%3Dtrue" +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+0+ "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+                    String message1 = "报销审批完成请确认拨款。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2fbx%2fDetails%3Fidss%3D" + byid.getId() +"%26success%3Dtrue" +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+0+ "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
                     oefiService.sendMsg(sb.toString(), message1);
                     oaWxExtendedSuper.setState("1");
                     oaWxExtendedSuperService.updateAudit(oaWxExtendedSuper);
@@ -476,7 +491,7 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
      */
     @SuppressWarnings("AlibabaTransactionMustHaveRollback")
     @Transactional( rollbackFor = Exception.class ,readOnly = false)
-    public void bmbaoxiaosave(HttpServletRequest request, HttpServletResponse response) throws ParseException {
+    public double bmbaoxiaosave(HttpServletRequest request, HttpServletResponse response) throws ParseException {
         String[] costs = request.getParameterValues("cost");
         String types=request.getParameter("proItemType");
         String fid = request.getParameter("fid");
@@ -517,6 +532,46 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
             oaWxBxCorrelationService.save(oaWxBxCorrelation);
         }
         accountService.AccountAdd(money/100,UserUtils.getUser().getId(),oaWxBxCorrelationSuper.getId());
+        return money;
+    }
+    /**
+     * 非销售报销添加
+     * @param request
+     * @param response
+     * @throws ParseException
+     */
+    @SuppressWarnings("AlibabaTransactionMustHaveRollback")
+    @Transactional( rollbackFor = Exception.class ,readOnly = false)
+    public double fxsbaoxiaosave(HttpServletRequest request, HttpServletResponse response) throws ParseException {
+        String[] costs = request.getParameterValues("cost");
+        String types=request.getParameter("proItemType");
+        String fid = request.getParameter("fid");
+        String[] fymxes = request.getParameterValues("fymx");
+        String file = request.getParameter("file");
+        String[] lx = request.getParameterValues("lx");
+        OaWxExtendedSuper oaWxExtendedSuper = new OaWxExtendedSuper();
+        oaWxExtendedSuper.setEnclosure(file);
+        oaWxExtendedSuper.setAppropriation("0");
+        oaWxExtendedSuper.setProItemType(types);
+        oaWxExtendedSuper.setRbsType("0");
+        oaWxExtendedSuper.setProId(fid);
+        oaWxExtendedSuperService1.save(oaWxExtendedSuper);
+        List<OaWxExtended> list = new ArrayList<OaWxExtended>();
+        Double money=0.0;
+        for (int i = 0; i < costs.length; i++) {
+            OaWxExtended oaWxExtended = new OaWxExtended();
+            money+=Double.valueOf(costs[i])*100;
+            oaWxExtended.setCost(Double.valueOf(costs[i])*100);
+            oaWxExtended.setContent(fymxes[i]);
+            oaWxExtended.setProId(lx[i]);
+            oaWxExtended.setCreateDate(new Date());
+            oaWxExtended.setState("0");
+            oaWxExtended.setOaWxExtendedSuper(oaWxExtendedSuper);
+            this.save(oaWxExtended);
+        }
+        String s = saveAudit(oaWxExtendedSuper, request,types);
+        accountService.AccountAdd(money/100,UserUtils.getUser().getId(),oaWxExtendedSuper.getId());
+        return money;
     }
 
     /**
@@ -527,7 +582,7 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
      */
 
     @Transactional( rollbackFor = Exception.class ,readOnly = false)
-    public void baoxiaosave(HttpServletRequest request, HttpServletResponse response,List<String>  a) throws ParseException {
+    public double baoxiaosave(HttpServletRequest request, HttpServletResponse response,List<String>  a) throws ParseException {
         String[] costs = request.getParameterValues("cost");
         String types=request.getParameter("proItemType");
         String fid = request.getParameter("fid");
@@ -571,7 +626,8 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
             oaWxBxCorrelationService.save(oaWxBxCorrelation);
 
         }
-        accountService.AccountAdd(money/100,UserUtils.getUser().getId(),oaWxBxCorrelationSuper.getId());
+        accountService.AccountAdd(money/100,UserUtils.getUser().getId(),oaWxExtendedSuper.getId());
+        return money;
     }
 
 
@@ -586,7 +642,7 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
     @Transactional(rollbackFor = Exception.class, readOnly = false)
     public boolean Auditylx(String proid, String flowid, String content,String stop) {
         OaWxExtendedSuper oaWxExtendedSuper1=new OaWxExtendedSuper();
-        OaWxExtendedSuper oaWxExtendedSuper=oaWxExtendedSuperService1.get(proid);
+        OaWxExtendedSuper oaWxExtendedSuper=oaWxExtendedSuperService.get(proid);
         Map<String, String> returnmap=null;
         OaWxBxCorrelationSuper oaWxBxCorrelationSuperService2=null;
         OaWxExtendedSuper byid =null;
@@ -594,7 +650,7 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
             byid = oaWxExtendedSuperService.findByid(oaWxExtendedSuper1);
              oaWxBxCorrelationSuperService2 = oaWxBxCorrelationSuperService.get2(byid.getId());
             User user1 = userDao.get(oaWxExtendedSuper.getCreateBy().getId());
-            String message = "您有新的报销信息需要审批，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2fDetails%3Fidss%3D" + oaWxBxCorrelationSuperService2.getId() +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+0+"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+            String message = "您有新的非销售报销需要审批，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2ffxsDetails%3Fid%3D" +oaWxExtendedSuper.getId() +"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
             String finishmessage = "";//"报销信息审批完成。\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2fbx%2Details?idss=" + byid.getId() + "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
             returnmap = oefiService.auditFlow(flowid, true, message, finishmessage, content);
         if (!"true".equals(returnmap.get("success"))) {
@@ -616,7 +672,8 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
                     if (sb.length() > 0) {
                         sb.deleteCharAt(sb.length() - 1);
                     }
-                    String message1 = "报销信息审批完成请确认拨款。\n申请人："+user1.getName()+"\n申请日期："+ DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2fDetails%3Fidss%3D" + oaWxBxCorrelationSuperService2.getId() +"%26success%3Dtrue" +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+0+ "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+                    String message1 = "报销审批完成请确认拨款，请到OA应用确认审批。\n申请人："+user1.getName()+"\n申请日期："+DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2ffxsDetails%3Fid%3D" +oaWxExtendedSuper.getId() +"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+                    //String message1 = "报销信息审批完成请确认拨款。\n申请人："+user1.getName()+"\n申请日期："+ DateUtils.formatDateTimeF(oaWxExtendedSuper.getCreateDate())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2fDetails%3Fidss%3D" + oaWxBxCorrelationSuperService2.getId() +"%26success%3Dtrue" +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+0+ "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
                     oefiService.sendMsg(sb.toString(), message1);
                     oaWxExtendedSuper.setState("1");
                     oaWxExtendedSuperService.updateAudit(oaWxExtendedSuper);
@@ -625,17 +682,6 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
         return true;
     }
 
-
-    @Autowired
-    OaEosProService oaEosProService;
-
-    @Autowired
-    OaEosProStartService oaEosProStartService;
-
-    @Autowired
-    OaEosProUnService oaEosProUnService;
-    @Autowired
-    OaEosProDao oaEosProDao;
 
     /**
      * 财务审核基本报销方法
@@ -651,9 +697,7 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
     public boolean appropriationbaoxiao(String proid, String type,String stop,String flowid,String content) {
         User user = UserUtils.getUser();
         type = type.replaceAll("\\s*", "");
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuperService1 = oaWxBxCorrelationSuperService.get(proid);
-        OaWxExtendedSuper oaWxExtendedSuper=null;
-            oaWxExtendedSuper = oaWxExtendedSuperService.get(oaWxBxCorrelationSuperService1.getExtendedSuperId());
+        OaWxExtendedSuper oaWxExtendedSuper = oaWxExtendedSuperService.get(proid);
             oaWxExtendedSuper.setRemarks(content);
             oaWxExtendedSuper.setUpdateBy(user);
         try {
@@ -720,13 +764,8 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
     @SuppressWarnings("AlibabaTransactionMustHaveRollback")
     @Transactional(rollbackFor = Exception.class, readOnly = false)
     public boolean baoxiaodelcx(User user, String id) {
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuper = oaWxBxCorrelationSuperService.get(id);
-
-        OaWxExtendedSuper oaWxExtended1 = new OaWxExtendedSuper();
-        oaWxExtended1.setCreateBy(user);
-        oaWxExtended1.setId(oaWxBxCorrelationSuper.getExtendedSuperId());
         try {
-            OaWxExtendedSuper oaWxExtended = oaWxExtendedSuperService.findByid(oaWxExtended1);
+            OaWxExtendedSuper oaWxExtended = oaWxExtendedSuperService.get(id);
             OaEosFlowItem oaEosFlowItem = new OaEosFlowItem();
             oaEosFlowItem.setFlowId(oaWxExtended.getFlow().getFlowId());
             oefiService.delete(oaEosFlowItem);
@@ -763,22 +802,20 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
     public boolean AuditProBack(String proid,String flowid,String content){
         System.out.println(proid);
         User user= UserUtils.getUser();
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuperService2 = oaWxBxCorrelationSuperService.get(proid);
-        OaWxExtendedSuper  oaWxExtendedSuper=  oaWxExtendedSuperService1.get(oaWxBxCorrelationSuperService2.getExtendedSuperId());
-        String finishmessage="你的报销审批被"+user.getName()+"驳回。\n 驳回原因："+content+"\n驳回时间："+DateUtils.formatDateTimeF(new Date())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2fDetails%3Fidss%3D" + oaWxBxCorrelationSuperService2.getId() +"%26success%3Dtrue" +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+1+ "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
-            OaWxExtendedSuper prostart=oaWxExtendedSuper;
-            prostart.setState("-1");
-            prostart.setAppropriation("2");
-            prostart.setRemarks(content);
-            prostart.setUpdateBy(user);
-            oaWxExtendedSuperService.update(prostart);
-            User u=userDao.get(prostart.getCreateBy().getId());
-            if(u.getWxUsers()!=null) {
-                oefiService.sendMsg(u.getWxUsers().getUserid(), finishmessage);//流程执行完成通知用户
-            }
-            OaWxExtended extended=new OaWxExtended();
-            extended.setOaWxExtendedSuper(oaWxExtendedSuper);
-            cancelAudit(oaWxExtendedSuper);
+        OaWxExtendedSuper oaWxExtendedSuper=oaWxExtendedSuperService.get(proid);
+        String message1 = "你的报销审批被"+user.getName()+"驳回。\n驳回原因："+content+"\n驳回时间："+DateUtils.formatDateTime(new Date())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2ffxsDetails%3Fid%3D" +oaWxExtendedSuper.getId() +"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+        oaWxExtendedSuper.setState("-1");
+        oaWxExtendedSuper.setAppropriation("2");
+        oaWxExtendedSuper.setRemarks(content);
+        oaWxExtendedSuper.setUpdateBy(user);
+        oaWxExtendedSuperService.update(oaWxExtendedSuper);
+        User u=userDao.get(oaWxExtendedSuper.getCreateBy().getId());
+        if(u.getWxUsers()!=null) {
+            oefiService.sendMsg(u.getWxUsers().getUserid(), message1);//流程执行完成通知用户
+        }
+        OaWxExtended extended=new OaWxExtended();
+        extended.setOaWxExtendedSuper(oaWxExtendedSuper);
+        cancelAudit(oaWxExtendedSuper);
         return true;
     }
 
@@ -793,18 +830,18 @@ public class OaWxExtendedService extends CrudService<OaWxExtendedDao, OaWxExtend
     public boolean out(String proid,String flowid,String content){
         System.out.println(proid);
         User user= UserUtils.getUser();
-        OaWxExtendedSuper  oaWxExtendedSuper=  oaWxExtendedSuperService1.get(proid);
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuperService2 = oaWxBxCorrelationSuperService.get2(oaWxExtendedSuper.getId());
-        String finishmessage="你的报销审批被"+user.getName()+"驳回。\n 驳回原因："+content+"\n驳回时间："+DateUtils.formatDateTimeF(new Date())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2fDetails%3Fidss%3D" + oaWxBxCorrelationSuperService2.getId() +"%26success%3Dtrue" +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+1+ "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
-        Map<String,String> returnmap=oefiService.rejectFlow(flowid,content);
         //基本报销驳回 添加报销启动数据
-        OaWxExtendedSuper prostart=oaWxExtendedSuper;
-        prostart.setState("-1");
-        prostart.setAppropriation("2");
-        oaWxExtendedSuperService.update(prostart);
-        User u=userDao.get(prostart.getCreateBy().getId());
+        OaWxExtendedSuper oaWxExtendedSuper=oaWxExtendedSuperService.get(proid);
+        String message1 = "你的报销审批被"+user.getName()+"驳回。\n 驳回原因："+content+"\n驳回时间："+DateUtils.formatDateTimeF(new Date())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2ffxsDetails%3Fid%3D" +oaWxExtendedSuper.getId() +"&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+        //String finishmessage="你的报销审批被"+user.getName()+"驳回。\n 驳回原因："+content+"\n驳回时间："+DateUtils.formatDateTimeF(new Date())+"\n<a href=\"https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww4ef5a724c1534989&redirect_uri=http%3a%2f%2fwww.mingcaiedu.com%3a8088%2foa%2fweixin%2ftwo%2fDetails%3Fidss%3D" + oaWxBxCorrelationSuperService2.getId() +"%26success%3Dtrue" +"%26type%3D"+oaWxExtendedSuper.getProItemType()+"%26sh%3D"+1+ "&response_type=code&scope=snsapi_base&state=#wechat_redirect\">点击查看</a>";
+        Map<String,String> returnmap=oefiService.rejectFlow(flowid,content);
+
+        oaWxExtendedSuper.setState("-1");
+        oaWxExtendedSuper.setAppropriation("2");
+        oaWxExtendedSuperService.update(oaWxExtendedSuper);
+        User u=userDao.get(oaWxExtendedSuper.getCreateBy().getId());
         if(u.getWxUsers()!=null) {
-            oefiService.sendMsg(u.getWxUsers().getUserid(), finishmessage);//流程执行完成通知用户
+            oefiService.sendMsg(u.getWxUsers().getUserid(), message1);//流程执行完成通知用户
         }
         cancelAudit(oaWxExtendedSuper);
         return true;

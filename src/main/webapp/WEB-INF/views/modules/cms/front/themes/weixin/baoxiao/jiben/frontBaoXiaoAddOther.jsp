@@ -81,7 +81,7 @@
         </button>
         <h1 class="mui-center mui-title"><c:if test="${types =='ylx'}">预立项报销申请</c:if><c:if test="${types =='lx'}">立项报销申请</c:if><c:if test="${types =='bm'}">部门报销申请</c:if><c:if test="${types =='fxs'}">非销售立项报销申请</c:if></h1>
     </div>
-    <form class="frm" action="<c:choose> <c:when test="${types =='bm'}">${oa}/weixin/two/bmadd</c:when><c:otherwise>${oa}/weixin/two/add</c:otherwise> </c:choose> " method="post" enctype="multipart/form-data">
+    <form class="frm" action="<c:choose> <c:when test="${types =='bm'}">${oa}/weixin/two/bmadd</c:when><c:when test="${types =='fxs'}">${oa}/weixin/two/fxsadd</c:when><c:otherwise>${oa}/weixin/two/add</c:otherwise> </c:choose> " method="post" enctype="multipart/form-data">
         <input type="hidden" name="proItemType" value="${types}">
         <input type="hidden" name="types" value="${types}">
         <input type="hidden" name="code" value="${code}">
@@ -106,7 +106,7 @@
                                         </div>
                                         <div class="weui-cell weui-cell_access" >
                                             <div class="weui-cell__bd">
-                                                <span style="vertical-align: middle" >每月额度</span>
+                                                <span style="vertical-align: middle" >每月额</span>
                                             </div>
                                             <div class="weui-cell__ft">￥${fns:getAccount(fns:getUser().id).branchQuota}元</div>
                                         </div>
@@ -155,7 +155,7 @@
                                     <div class="mui-card-content">
                                         <div class="mui-input-row">
                                             <div class="weui-cell weui-cell_access" >
-                                                <span class="warning">您的年销售额度未设定，请与公司销售总经理联系，设定年销售额！</span>
+                                                <span class="warning">您的年销售额未设定，请与公司销售总经理联系，设定年销售额！</span>
                                             </div>
                                         </div>
                                     </div>
@@ -182,37 +182,54 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <c:if test="${types!='bm'&& types!='fxs'}">
-                                                    <div class="weui-uploader">
+                                                <c:if test="${cmh!=null}">
+                                                    <div class="weui-uploader" id="cmh" <c:if test="${types=='bm'}">style="display: none;" </c:if>>
                                                         <div class="weui-uploader__hd">
                                                             <p class="weui-uploader__title">管理中心</p>
                                                         </div>
                                                         <div class="weui-uploader__bd">
                                                             <div class="weui-uploader_box">
-                                                                <img src="${management.wxUsers.avatar}/100"/>
+                                                                <img src="${cmh.wxUsers.avatar}/100"/>
                                                                 <div class="name">
-                                                                        ${management.wxUsers.name}
+                                                                        ${cmh.wxUsers.name}
                                                                 </div>
-                                                                <input type="hidden" value="${management.id}" name="group_two">
+                                                                <input type="hidden" value="${cmh.id}" name="group_two">
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </c:if>
+                                            <c:if test="${pz!=null}">
                                                 <div class="weui-uploader">
                                                     <div class="weui-uploader__hd">
                                                         <p class="weui-uploader__title">总经理</p>
                                                     </div>
                                                     <div class="weui-uploader__bd">
                                                         <div class="weui-uploader_box">
-                                                            <img src="${manager.wxUsers.avatar}/100"/>
+                                                            <img src="${pz.wxUsers.avatar}/100"/>
                                                             <div class="name">
-                                                                ${manager.wxUsers.name}
+                                                                ${pz.wxUsers.name}
                                                             </div>
-                                                            <input type="hidden" value="${manager.id}" name="group_three">
+                                                            <input type="hidden" value="${pz.id}" name="group_three">
                                                         </div>
                                                     </div>
                                                 </div>
-
+                                            </c:if>
+                                            <c:if test="${fz!=null}">
+                                                <div class="weui-uploader">
+                                                    <div class="weui-uploader__hd">
+                                                        <p class="weui-uploader__title">总经理</p>
+                                                    </div>
+                                                    <div class="weui-uploader__bd">
+                                                        <div class="weui-uploader_box">
+                                                            <img src="${fz.wxUsers.avatar}/100"/>
+                                                            <div class="name">
+                                                                    ${fz.wxUsers.name}
+                                                            </div>
+                                                            <input type="hidden" value="${fz.id}" name="group_three">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </c:if>
                                             </div>
                                         </div>
                                     </div>
@@ -364,6 +381,7 @@
     jsonzpro = [];
 
     type='${types}';
+    var SaleDepartmentId='${SaleDepartmentId}';
     var $valuesjson = [];
     var resultMap;
     jsonzpro = [];
@@ -401,7 +419,13 @@
                     $this.children().next().html(result1[0].label);
                     $this.children().next().next().val(result1[0].value);
                    // var result=resultMap[result1[0].value];
-
+                    if (type == 'bm'&&result1[0].value==SaleDepartmentId) {
+                            $("#cmh").show();
+                    }else {
+                        if ($("#cmh")) {
+                             $("#cmh").hide();
+                        }
+                    }
                     jsonzpro=[];
                     if (type == 'fxs') {
                         var result = resultMap[result1[0].value];

@@ -127,7 +127,7 @@ public class OaUserAccountController extends BaseController {
 		for(OaWxUsers user:page){
 			if(user.getUser()!=null) {
 				OaUserAccount account = oaUserAccountService.get(user.getUser().getId());
-				//user.setAccount(account);
+				user.setAccount(account);
 			}
 		}
 		model.addAttribute("page", page);

@@ -14,6 +14,8 @@
 		a.create_by AS "createBy.id",
 		a.create_date AS "createDate",
 		a.update_by AS "updateBy.id",
+		owu.name as "updateBy.wxUsers.name",
+		owu.avatar as "updateBy.wxUsers.avatar",
 		a.update_date AS "updateDate",
 		a.remarks AS "remarks",
 		a.del_flag AS "delFlag",
@@ -30,6 +32,8 @@
 
     <sql id="oaWxExtendedSuperJoins">
         left join oa_eos_pro pro on pro.id=a.pro_id left join  oa_wx_department dep on a.pro_id=dep.id  left join oa_eos_pro_un un on un.id=a.pro_id
+        LEFT JOIN sys_user u ON u.id = a.update_by
+		LEFT JOIN oa_wx_users owu ON owu.mobile = u.mobile
     </sql>
 
     <select id="get" resultType="OaWxExtendedSuper">
@@ -47,16 +51,28 @@
         <include refid="oaWxExtendedSuperJoins"/>
         <where>
             a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="!cw">
             AND
-            a.create_by=#{createBy.id}
+            a.create_by=#{userId}
+            </if>
             and  a.rbs_type=#{rbsType}
+            <if test="cw">
+                AND ((a.appropriation=0 and a.state=1) or a.appropriation=1 or a.appropriation =2)
+            </if>
+            <if test="starttime!=null and starttime!='' and endtime!=null and endtime!=''">
+                AND a.create_date BETWEEN #{starttime} AND #{endtime}
+            </if>
         </where>
         <choose>
             <when test="page !=null and page.orderBy != null and page.orderBy != ''">
                 ORDER BY ${page.orderBy}
             </when>
             <otherwise>
-                ORDER BY a.update_date DESC
+                ORDER BY
+                <if test="cw">
+                     a.appropriation ASC,
+                </if>
+                a.create_date DESC
             </otherwise>
         </choose>
     </select>
@@ -179,9 +195,50 @@
         inner JOIN oa_eos_flow_item flow ON flow.flow_id = b.flow_id
         WHERE b.del_flag = 0 AND flow.user_id= #{userId} AND b.state=0 AND flow.status=0 AND rbs_type=1 ) ORDER BY a.create_date DESC
     </select>
-
-
-
+    <select id="findListByUser" resultType="OaWxExtendedSuper">
+        SELECT
+        <include refid="oaWxExtendedSuperColumns"/>,
+        flow.create_date as "flow.createDate",
+        flow.status as "flow.status",
+        flow.update_date as "flow.updateDate"
+        FROM oa_wx_extended_super a
+        <include refid="oaWxExtendedSuperJoins"/>
+        RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            AND flow.user_id=#{userId} and a.state=0  and flow.status=0 AND rbs_type=#{rbsType} and flow.send_status=1
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY flow.create_date desc
+            </otherwise>
+        </choose>
+    </select>
+    <select id="findFinishListByUser" resultType="OaWxExtendedSuper">
+        SELECT
+        <include refid="oaWxExtendedSuperColumns"/>,
+        flow.create_date as "flow.createDate",
+        flow.status as "flow.status",
+        flow.update_date as "flow.updateDate"
+        FROM oa_wx_extended_super a
+        <include refid="oaWxExtendedSuperJoins"/>
+        RIGHT JOIN oa_eos_flow_item flow ON flow.flow_id = a.flow_id
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            AND flow.user_id=#{userId}   and flow.status!=0 AND rbs_type=#{rbsType} and flow.send_status=1
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY flow.update_date desc
+            </otherwise>
+        </choose>
+    </select>
     <select id="findByProId" resultType="OaWxExtendedSuper">
         select <include refid="oaWxExtendedSuperColumns"/> from  oa_wx_extended_super a  <include refid="oaWxExtendedSuperJoins"/>  where a.pro_id=#{proId}
     </select>

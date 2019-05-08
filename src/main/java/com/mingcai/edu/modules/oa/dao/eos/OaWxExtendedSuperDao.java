@@ -25,6 +25,19 @@ public interface OaWxExtendedSuperDao extends CrudDao<OaWxExtendedSuper> {
     public   OaWxExtendedSuper  findByid(OaWxExtendedSuper oaWxExtendedSuper);
     public  void updateApproPriAtion(OaWxExtendedSuper oaWxExtendedSuper);
 
+    /***
+     * 找到未处理报销
+     * @param oaWxExtendedSuper
+     * @return
+     */
+    public List<OaWxExtendedSuper> findListByUser(OaWxExtendedSuper oaWxExtendedSuper);
+    /***
+     * 找到已处理报销
+     * @param oaWxExtendedSuper
+     * @return
+     */
+    public List<OaWxExtendedSuper> findFinishListByUser(OaWxExtendedSuper oaWxExtendedSuper);
+
     /**
      * 已处理
      * @param userId

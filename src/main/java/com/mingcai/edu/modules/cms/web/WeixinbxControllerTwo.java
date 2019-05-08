@@ -78,6 +78,8 @@ public class WeixinbxControllerTwo extends BaseController {
     OaWxDepartmentService oaWxDepartmentService;
 
     @Autowired
+    OaEosProStartItemService oaEosProStartItemService;
+    @Autowired
     UserDao userDao;
     /**
      * 其他报销
@@ -90,18 +92,19 @@ public class WeixinbxControllerTwo extends BaseController {
     public void Other(String type, String types,String code, Model model){
         Site site = CmsUtils.getSite(Site.defaultSiteId());
         site.setTheme("weixin");
-        User manager=null;
-        User management=null;
         if (types.equals("ylx")||types.equals("lx")){
-            manager = UserUtils.get(pzid);
-            management = UserUtils.get(cmh);
-        }else {
-            manager = UserUtils.get(fzid);
-            management = UserUtils.get(cmh);
+            model.addAttribute("pz",userDao.get(pzid));
+            model.addAttribute("cmh",userDao.get(cmh));
         }
-        model.addAttribute("manager",manager);
-        model.addAttribute("management",management);
+        if (types.equals("fxs")) {
+            model.addAttribute("fz", userDao.get(pzid));
+        }
+        if (types.equals("bm")) {
+            model.addAttribute("fz", userDao.get(fzid));
+            model.addAttribute("cmh", userDao.get(cmh));
+        }
         model.addAttribute("site", site);
+        model.addAttribute("SaleDepartmentId", SaleDepartmentId);
         model.addAttribute("code", code);
         model.addAttribute("type", type);
         model.addAttribute("types", types);
@@ -128,8 +131,8 @@ public class WeixinbxControllerTwo extends BaseController {
                            String key= QiniuUpload.upload(file.getInputStream(),AK,SK,BUCKET);
                            feleimg.add( qiniuRUL+key);
                     }*/
-            oaWxExtendedService.baoxiaosave(request, response,feleimg);
-            return "redirect:/oa/weixin";
+            model.addAttribute("site", site);
+            return "redirect:" + OaPath + "/weixin/two/applysuccess?cost="+oaWxExtendedService.baoxiaosave(request, response,feleimg)/100;
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "你的申请信息有误请重新申请");
@@ -137,6 +140,14 @@ public class WeixinbxControllerTwo extends BaseController {
             Other(type,types,code,model);
             return "modules/cms/front/themes/weixin/baoxiao/jiben/frontBaoXiaoAddOther";
         }
+    }
+    @RequestMapping("applysuccess")
+    public String testPage(@RequestParam(required = false) String cost,Model model){
+        Site site = CmsUtils.getSite(Site.defaultSiteId());
+        site.setTheme("weixin");
+        model.addAttribute("site", site);
+        model.addAttribute("cost", cost);
+        return "modules/cms/front/themes/weixin/baoxiao/success";
     }
     /**
      * 部门报销添加
@@ -157,8 +168,35 @@ public class WeixinbxControllerTwo extends BaseController {
         model.addAttribute("type", type);
         model.addAttribute("types", types);
         try {
-            oaWxExtendedService.bmbaoxiaosave(request,response);
-            return "redirect:/oa/weixin";
+            return "redirect:" + OaPath + "/weixin/two/applysuccess?cost="+oaWxExtendedService.bmbaoxiaosave(request,response)/100;
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "你的申请信息有误请重新申请");
+            model.addAttribute("gsons", Global.wxusermap);
+            Other(type,types,code,model);
+            return "modules/cms/front/themes/weixin/baoxiao/jiben/frontBaoXiaoAddOther";
+        }
+    }
+    /**
+     * 部门报销添加
+     * @param type
+     * @param types
+     * @param code
+     * @param request
+     * @param response
+     * @param model
+     * @return
+     */
+    @RequestMapping("fxsadd")
+    public  String  fxsadd(String type, String types, @RequestParam(required = false) String code, HttpServletRequest request, HttpServletResponse response, Model model){
+        Site site = CmsUtils.getSite(Site.defaultSiteId());
+        site.setTheme("weixin");
+        model.addAttribute("site", site);
+        model.addAttribute("code", code);
+        model.addAttribute("type", type);
+        model.addAttribute("types", types);
+        try {
+            return "redirect:" + OaPath + "/weixin/two/applysuccess?cost="+oaWxExtendedService.fxsbaoxiaosave(request,response)/100;
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "你的申请信息有误请重新申请");
@@ -181,48 +219,11 @@ public class WeixinbxControllerTwo extends BaseController {
     @RequestMapping("selby")
     public Object ylx1(@RequestParam(required = false) String code, String type, HttpServletRequest request, HttpServletResponse response, Model model, String types) {
         User user = UserUtils.getUser();
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuper=new OaWxBxCorrelationSuper();
-        oaWxBxCorrelationSuper.setCreateBy(user);
-        Page<OaWxBxCorrelationSuper> page = oaWxBxCorrelationSuperService.findPage(new Page<OaWxBxCorrelationSuper>(request, response), oaWxBxCorrelationSuper);
-        List<Map> mapList = null;
-        for (OaWxBxCorrelationSuper ite: page.getList()) {
-            mapList=new ArrayList<Map>();
-            double mocey = 0;
-            OaWxExtendedSuper oa=new OaWxExtendedSuper();
-            oa.setId(ite.getExtendedSuperId());
-            OaWxExtended oaWxExtended=new OaWxExtended();
-            oaWxExtended.setOaWxExtendedSuper(oa);
-           List<OaWxExtended> owelist=oaWxExtendedService.findBySuperProId(oaWxExtended);
-            for (OaWxExtended i :owelist){
-                mocey += i.getCost();
-            }
-            TreeMap<String, Object> map = new TreeMap<String, Object>();
-            map.put("id", ite.getId());
-            map.put("user", UserUtils.get(ite.getCreateBy().getId()));
-            if (ite.getOaWxExtendedSuper().getProItemType().equals("ylx")) {
-                ite.setPro( oaEosProService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
-                map.put("proName", ite.getPro().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("lx")) {
-                ite.setPro( oaEosProService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
-                map.put("proName", ite.getPro().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("bm")) {
-              ite.getOaWxExtendedSuper().setOaWxDepartment(oaWxDepartmentService.get(ite.getProId()));
-                map.put("proName", ite.getOaWxExtendedSuper().getOaWxDepartment().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("fxs")) {
-                ite.setUn( oaEosProUnService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setOaEosProUn( oaEosProUnService.get(ite.getProId()));
-                map.put("proName", ite.getOaWxExtendedSuper().getOaEosProUn().getName());
-            }
-            map.put("cost", mocey);
-            map.put("state", ite.getOaWxExtendedSuper().getState().equals("0") ? "待审核" : ite.getOaWxExtendedSuper().getState().equals("1") ? "审核通过" : ite.getOaWxExtendedSuper().getState().equals("-1") ? "已驳回" : ite.getOaWxExtendedSuper().getState().equals("2") ? "已撤销" : "出现异常请联系系统管理员");
-            map.put("crdate", DateUtils.formatDateTimeF(ite.getCreateDate()));
-            map.put("appropriation", ite.getOaWxExtendedSuper().getAppropriation());
-            map.put("type", ite.getOaWxExtendedSuper().getProItemType());
-            mapList.add(map);
-            ite.setMap(mapList);
-        }
+        OaWxExtendedSuper exsuper=new OaWxExtendedSuper();
+        exsuper.setUserId(user.getId());
+        exsuper.setRbsType("0");//基本类型
+        Page<OaWxExtendedSuper> page = oaWxExtendedSuperService.findPage(new Page<OaWxExtendedSuper>(request, response), exsuper);
+        OaWxExtendedSuperList(page);
         return page;
     }
     /**
@@ -239,50 +240,13 @@ public class WeixinbxControllerTwo extends BaseController {
     @RequestMapping("selbysh")
     public Object ylx1sh(@RequestParam(required = false) String code, String type, HttpServletRequest request, HttpServletResponse response, Model model, String types) {
         User user = UserUtils.getUser();
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuper=new OaWxBxCorrelationSuper();
-        oaWxBxCorrelationSuper.setCreateBy(user);
-        Page<OaWxBxCorrelationSuper> page = oaWxBxCorrelationSuperService.findUntreatedList(new Page<OaWxBxCorrelationSuper>(request, response), oaWxBxCorrelationSuper);
-        List<Map> mapList = null;
-        for (OaWxBxCorrelationSuper ite: page.getList()) {
-            mapList=new ArrayList<Map>();
-            double mocey = 0;
-            OaWxBxCorrelation OaWxBxCorrelation=new OaWxBxCorrelation();
-            OaWxBxCorrelation.setOaWxBxCorrelationSuper(ite);
-            List<OaWxBxCorrelation> bySuperId = oaWxBxCorrelationService.findBySuperId(OaWxBxCorrelation);
-            for (OaWxBxCorrelation i :bySuperId){
-                mocey += i.getEx().getCost();
-            }
-            TreeMap<String, Object> map = new TreeMap<String, Object>();
-            map.put("id", ite.getId());
-            map.put("user", UserUtils.get(ite.getCreateBy().getId()));
-            if (ite.getOaWxExtendedSuper().getProItemType().equals("ylx")) {
-                ite.setPro( oaEosProService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
-                map.put("proName", ite.getPro().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("lx")) {
-                ite.setPro( oaEosProService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
-                map.put("proName", ite.getPro().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("bm")) {
-                ite.getOaWxExtendedSuper().setOaWxDepartment(oaWxDepartmentService.get(ite.getProId()));
-                map.put("proName", ite.getOaWxExtendedSuper().getOaWxDepartment().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("fxs")) {
-                ite.setUn( oaEosProUnService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setOaEosProUn( oaEosProUnService.get(ite.getProId()));
-                map.put("proName", ite.getOaWxExtendedSuper().getOaEosProUn().getName());
-            }
-            map.put("cost", mocey);
-            map.put("state", ite.getOaWxExtendedSuper().getState().equals("0") ? "待审核" : ite.getOaWxExtendedSuper().getState().equals("1") ? "审核通过" : ite.getOaWxExtendedSuper().getState().equals("-1") ? "已驳回" : ite.getOaWxExtendedSuper().getState().equals("2") ? "已撤销" : "出现异常请联系系统管理员");
-            map.put("crdate", DateUtils.formatDateTimeF(ite.getCreateDate()));
-            map.put("appropriation", ite.getOaWxExtendedSuper().getAppropriation());
-            map.put("type", ite.getOaWxExtendedSuper().getProItemType());
-            mapList.add(map);
-            ite.setMap(mapList);
-        }
+        OaWxExtendedSuper exsuper=new OaWxExtendedSuper();
+        exsuper.setUserId(user.getId());
+        exsuper.setRbsType("0");//基本类型
+        Page<OaWxExtendedSuper> page = oaWxExtendedSuperService.findListUn(new Page<OaWxExtendedSuper>(request, response), exsuper);
+        OaWxExtendedSuperList(page);
         return page;
     }
-
-
     /**
      * 基本报销财务查询
      * @param code
@@ -297,60 +261,13 @@ public class WeixinbxControllerTwo extends BaseController {
     @RequestMapping("selbycw")
     public Object ylx1cw(@RequestParam(required = false) String code, String type, HttpServletRequest request, HttpServletResponse response, Model model, String types) {
         User user = UserUtils.getUser();
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuper=new OaWxBxCorrelationSuper();
-        oaWxBxCorrelationSuper.setCreateBy(user);
-        Page<OaWxBxCorrelationSuper> page = oaWxBxCorrelationSuperService.Finance(new Page<OaWxBxCorrelationSuper>(request, response), oaWxBxCorrelationSuper);
-        List<Map> mapList = null;
-        List<Role> rols= user.getRoleList();
-        boolean bool=false;
-        for(Role role:rols){
-            if(role.getName().equals(financeAuditRole)){//财务
-                bool =true;
-                break;
-            }
-        }
-        for (OaWxBxCorrelationSuper ite: page.getList()) {
-            mapList=new ArrayList<Map>();
-            double mocey = 0;
-            OaWxBxCorrelation OaWxBxCorrelation=new OaWxBxCorrelation();
-            OaWxBxCorrelation.setOaWxBxCorrelationSuper(ite);
-            OaWxExtendedSuper oa=new OaWxExtendedSuper();
-            oa.setId(ite.getExtendedSuperId());
-            OaWxExtended oaWxExtended=new OaWxExtended();
-            oaWxExtended.setOaWxExtendedSuper(oa);
-            List<OaWxExtended> owelist=oaWxExtendedService.findBySuperProId(oaWxExtended);
-            for (OaWxExtended i :owelist){
-                mocey += i.getCost();
-            }
-            TreeMap<String, Object> map = new TreeMap<String, Object>();
-            map.put("id", ite.getId());
-            map.put("user", UserUtils.get(ite.getCreateBy().getId()));
-            if (ite.getOaWxExtendedSuper().getProItemType().equals("ylx")) {
-                ite.setPro( oaEosProService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
-                map.put("proName", ite.getPro().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("lx")) {
-                ite.setPro( oaEosProService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
-                map.put("proName", ite.getPro().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("bm")) {
-                ite.getOaWxExtendedSuper().setOaWxDepartment(oaWxDepartmentService.get(ite.getProId()));
-                map.put("proName", ite.getOaWxExtendedSuper().getOaWxDepartment().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("fxs")) {
-                ite.setUn( oaEosProUnService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setOaEosProUn( oaEosProUnService.get(ite.getProId()));
-                map.put("proName", ite.getOaWxExtendedSuper().getOaEosProUn().getName());
-            }
-            map.put("cost", mocey);
-            map.put("state", ite.getOaWxExtendedSuper().getState().equals("0") ? "待审核" : ite.getOaWxExtendedSuper().getState().equals("1") ? "审核通过" : ite.getOaWxExtendedSuper().getState().equals("-1") ? "已驳回" : ite.getOaWxExtendedSuper().getState().equals("2") ? "已撤销" : "出现异常请联系系统管理员");
-            map.put("crdate", DateUtils.formatDateTimeF(ite.getCreateDate()));
-            map.put("appropriation", ite.getOaWxExtendedSuper().getAppropriation());
-            map.put("type", ite.getOaWxExtendedSuper().getProItemType());
-            map.put("role",bool);
 
-            mapList.add(map);
-            ite.setMap(mapList);
-        }
+        OaWxExtendedSuper exsuper=new OaWxExtendedSuper();
+        exsuper.setUserId(user.getId());
+        exsuper.setRbsType("0");//基本类型
+        exsuper.setCw(true);
+        Page<OaWxExtendedSuper> page = oaWxExtendedSuperService.findPage(new Page<OaWxExtendedSuper>(request, response), exsuper);
+        OaWxExtendedSuperList(page);
         return page;
     }
     /**
@@ -367,53 +284,62 @@ public class WeixinbxControllerTwo extends BaseController {
     @RequestMapping("selbyysh")
     public Object ylx1ysh(@RequestParam(required = false) String code, String type, HttpServletRequest request, HttpServletResponse response, Model model, String types) {
         User user = UserUtils.getUser();
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuper=new OaWxBxCorrelationSuper();
-        oaWxBxCorrelationSuper.setCreateBy(user);
-        Page<OaWxBxCorrelationSuper> page = oaWxBxCorrelationSuperService.findProcessedList(new Page<OaWxBxCorrelationSuper>(request, response), oaWxBxCorrelationSuper);
-        List<Map> mapList = null;
-        for (OaWxBxCorrelationSuper ite: page.getList()) {
-            mapList=new ArrayList<Map>();
+        OaWxExtendedSuper exsuper=new OaWxExtendedSuper();
+        exsuper.setUserId(user.getId());
+        exsuper.setRbsType("0");//基本类型
+        Page<OaWxExtendedSuper> page = oaWxExtendedSuperService.findFinishListByUser(new Page<OaWxExtendedSuper>(request, response), exsuper);
+        OaWxExtendedSuperList(page);
+        return page;
+    }
+    //处理报销列表list
+    public void OaWxExtendedSuperList(Page<OaWxExtendedSuper> page){
+        for (OaWxExtendedSuper ite: page.getList()) {
             double mocey = 0;
-            OaWxBxCorrelation OaWxBxCorrelation=new OaWxBxCorrelation();
-            OaWxBxCorrelation.setOaWxBxCorrelationSuper(ite);
-            OaWxExtendedSuper oa=new OaWxExtendedSuper();
-            oa.setId(ite.getExtendedSuperId());
-            OaWxExtended oaWxExtended=new OaWxExtended();
-            oaWxExtended.setOaWxExtendedSuper(oa);
-            List<OaWxExtended> owelist=oaWxExtendedService.findBySuperProId(oaWxExtended);
-            for (OaWxExtended i :owelist){
+            OaWxExtended owe=new OaWxExtended();
+            owe.setOaWxExtendedSuper(ite);
+            List<OaWxExtended> bySuperId = oaWxExtendedService.findBySuperProId(owe);
+            for (OaWxExtended i :bySuperId){
                 mocey += i.getCost();
             }
             TreeMap<String, Object> map = new TreeMap<String, Object>();
             map.put("id", ite.getId());
             map.put("user", UserUtils.get(ite.getCreateBy().getId()));
-            if (ite.getOaWxExtendedSuper().getProItemType().equals("ylx")) {
+            if (ite.getProItemType().equals("ylx")) {
                 ite.setPro( oaEosProService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
-                map.put("proName", ite.getPro().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("lx")) {
                 ite.setPro( oaEosProService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
                 map.put("proName", ite.getPro().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("bm")) {
-                ite.getOaWxExtendedSuper().setOaWxDepartment(oaWxDepartmentService.get(ite.getProId()));
-                map.put("proName", ite.getOaWxExtendedSuper().getOaWxDepartment().getName());
-            } else if (ite.getOaWxExtendedSuper().getProItemType().equals("fxs")) {
-                ite.setUn( oaEosProUnService.get(ite.getProId()));
-                ite.getOaWxExtendedSuper().setOaEosProUn( oaEosProUnService.get(ite.getProId()));
-                map.put("proName", ite.getOaWxExtendedSuper().getOaEosProUn().getName());
+            } else if (ite.getProItemType().equals("lx")) {
+                ite.setPro( oaEosProService.get(ite.getProId()));
+                ite.setPro( oaEosProService.get(ite.getProId()));
+                map.put("proName", ite.getPro().getName());
+            } else if (ite.getProItemType().equals("bm")) {
+                ite.setOaWxDepartment(oaWxDepartmentService.get(ite.getProId()));
+                map.put("proName", ite.getOaWxDepartment().getName());
+            } else if (ite.getProItemType().equals("fxs")) {
+                ite.setOaEosProUn( oaEosProUnService.get(ite.getProId()));
+                ite.setOaEosProUn( oaEosProUnService.get(ite.getProId()));
+                map.put("proName", ite.getOaEosProUn().getName());
             }
             map.put("cost", mocey);
-            map.put("state", ite.getOaWxExtendedSuper().getState().equals("0") ? "待审核" : ite.getOaWxExtendedSuper().getState().equals("1") ? "审核通过" : ite.getOaWxExtendedSuper().getState().equals("-1") ? "已驳回" : ite.getOaWxExtendedSuper().getState().equals("2") ? "已撤销" : "出现异常请联系系统管理员");
+            map.put("state", ite.getState().equals("0") ? "待审核" : ite.getState().equals("1") ? "审核通过" : ite.getState().equals("-1") ? "已驳回" : ite.getState().equals("2") ? "已撤销" : "出现异常请联系系统管理员");
             map.put("crdate", DateUtils.formatDateTimeF(ite.getCreateDate()));
-                map.put("appropriation", ite.getOaWxExtendedSuper().getAppropriation());
-            map.put("type", ite.getOaWxExtendedSuper().getProItemType());
-            mapList.add(map);
-            ite.setMap(mapList);
+            if(ite.getFlow()!=null&&ite.getFlow().getStatus()!=null) {
+                map.put("status", ite.getFlow().getStatus() == 1 ? "已处理" : "驳回");
+                map.put("update", DateUtils.formatDateTime(ite.getFlow().getUpdateDate()));
+            }
+            User user = UserUtils.getUser();
+            List<Role> rols= user.getRoleList();
+            for(Role role:rols){
+                if(role.getName().equals(financeAuditRole)){//财务
+                    map.put("cw", true);
+                    break;
+                }
+            }
+            map.put("appropriation", ite.getAppropriation());
+            map.put("type", ite.getProItemType());
+            ite.setObjmap(map);
         }
-        return page;
     }
-
     /**
      * 跳转到相对应的报销信息页面页面通过ajax进行相关查询
      * @param model
@@ -437,10 +363,79 @@ public class WeixinbxControllerTwo extends BaseController {
         }
     }
 
+//    /**
+//     * 报销详情查询，审核人员可以在此页面进行审核
+//     * @param idss
+//     * @param type
+//     * @param request
+//     * @param cost
+//     * @param sh
+//     * @param response
+//     * @param model
+//     * @return
+//     */
+//    @RequestMapping("Details")
+//    public String Details(String idss, @RequestParam(required = false) String type, HttpServletRequest request, String cost,String sh, HttpServletResponse response, Model model){
+//        boolean success = Boolean.parseBoolean(request.getParameter("success"));
+//        if (success) {
+//            model.addAttribute("success", "success");
+//        }
+//        Site site = CmsUtils.getSite(Site.defaultSiteId());
+//        site.setTheme("weixin");
+//        model.addAttribute("site", site);
+//        User user = UserUtils.getUser();
+//        OaWxBxCorrelationSuper oaWxBxCorrelationSuper = oaWxBxCorrelationSuperService.get1(idss);
+//        OaWxExtended oaWxExtended =new OaWxExtended();
+//        oaWxExtended.setOaWxBxCorrelationSuper(oaWxBxCorrelationSuper);
+//        oaWxBxCorrelationSuper.setUn(oaEosProUnService.get(oaWxBxCorrelationSuper.getProId()));
+//        oaWxBxCorrelationSuper.setOaWxDepartment(oaWxDepartmentService.get(oaWxBxCorrelationSuper.getProId()));
+//        List<OaWxExtended> list = oaWxExtendedDao.findBySuperId(oaWxExtended);
+//        oaWxBxCorrelationSuper.setOaWxBxCorrelations(list);
+//        OaEosFlow oeflow = new OaEosFlow();
+//        oeflow.setEosId(oaWxBxCorrelationSuper.getId());
+//        OaEosFlowItem item = new OaEosFlowItem();
+//        model.addAttribute("gsons", Global.wxusermap);
+//        if (oaWxBxCorrelationSuper.getOaWxExtendedSuper().getFlow() != null) {
+//            item.setFlowId(oaWxBxCorrelationSuper.getOaWxExtendedSuper().getFlow().getId());
+//            TreeMap<Integer, List<OaEosFlowItem>> maps = oaEosFlowItemService.findListByFlowId(item);
+//            model.addAttribute("flowmap", maps);
+//            model.addAttribute("flow", new OaEosFlow());
+//
+//            if (user != null) {
+//
+//                   oaEosFlowItemService.FlowUsers(maps); //找到要处理的流程
+//
+//                List<OaEosFlowItem> oeflsit = oaEosFlowItemService.FlowUsers(maps);
+//                for (OaEosFlowItem oflow : oeflsit) {
+//                    if (oflow.getUser().getId().equals(user.getUserId())) {
+//                        model.addAttribute("flow", oflow);
+//                    }
+//                }
+//            }
+//        }
+//        oaWxBxCorrelationSuper.setUpdateBy(userDao.get(oaWxBxCorrelationSuper.getUpdateBy().getId()));
+//        model.addAttribute("map", oaWxBxCorrelationSuper);
+//        model.addAttribute("user",UserUtils.get(oaWxBxCorrelationSuper.getCreateBy().getId()));
+//        model.addAttribute("cost", cost);
+//        model.addAttribute("types", type);
+//        model.addAttribute("site", site);
+//        model.addAttribute("sh",sh);
+//        if ("bm".equals(type)) {
+//            return "modules/cms/front/themes/" + site.getTheme() + "/baoxiao/jiben/frontBaoxiaoDetailsOtherBm";
+//        } else if ("fxs".equals(type)) {
+//            return "modules/cms/front/themes/" + site.getTheme() + "/baoxiao/jiben/frontBaoxiaoDetailsOtherFxs";
+//        } else if ("ylx".equals(type)){
+//            return "modules/cms/front/themes/" + site.getTheme() + "/baoxiao/jiben/frontBaoxiaoDetailsOtherYlx";
+//        }else if ("lx".equals(type)){
+//            return "modules/cms/front/themes/" + site.getTheme() + "/baoxiao/jiben/frontBaoxiaoDetailsOtherLx";
+//        }else{
+//            return "";
+//        }
+//    }
     /**
-     * 报销详情查询，审核人员可以在此页面进行审核
-     * @param idss
-     * @param type
+     * 非销售报销详情查询，审核人员可以在此页面进行审核
+     * @param id
+     * @param id
      * @param request
      * @param cost
      * @param sh
@@ -448,8 +443,8 @@ public class WeixinbxControllerTwo extends BaseController {
      * @param model
      * @return
      */
-    @RequestMapping("Details")
-    public String Details(String idss, @RequestParam(required = false) String type, HttpServletRequest request, String cost,String sh, HttpServletResponse response, Model model){
+    @RequestMapping("fxsDetails")
+    public String fxsDetails(String id,  HttpServletRequest request, String cost,String sh, HttpServletResponse response, Model model){
         boolean success = Boolean.parseBoolean(request.getParameter("success"));
         if (success) {
             model.addAttribute("success", "success");
@@ -458,27 +453,27 @@ public class WeixinbxControllerTwo extends BaseController {
         site.setTheme("weixin");
         model.addAttribute("site", site);
         User user = UserUtils.getUser();
-        OaWxBxCorrelationSuper oaWxBxCorrelationSuper = oaWxBxCorrelationSuperService.get1(idss);
-        OaWxExtended oaWxExtended =new OaWxExtended();
-        oaWxExtended.setOaWxBxCorrelationSuper(oaWxBxCorrelationSuper);
-        oaWxBxCorrelationSuper.setUn(oaEosProUnService.get(oaWxBxCorrelationSuper.getProId()));
-        oaWxBxCorrelationSuper.setOaWxDepartment(oaWxDepartmentService.get(oaWxBxCorrelationSuper.getProId()));
-        List<OaWxExtended> list = oaWxExtendedDao.findBySuperId(oaWxExtended);
-        oaWxBxCorrelationSuper.setOaWxBxCorrelations(list);
-        OaEosFlow oeflow = new OaEosFlow();
-        oeflow.setEosId(oaWxBxCorrelationSuper.getOaWxExtendedSuper().getId());
+        OaWxExtendedSuper oweSuper=oaWxExtendedSuperService.get(id);
+        OaWxExtended owe=new OaWxExtended();
+        owe.setOaWxExtendedSuper(oweSuper);
+        List<OaWxExtended> list=oaWxExtendedService.findBylistid(owe);
+        double mocey=0.0;
+        for(OaWxExtended owed:list){
+            mocey += owed.getCost();
+            if("fxs".equals(oweSuper.getProItemType())) {
+                owed.setOaEosProStartItem(oaEosProStartItemService.get(owed.getProId()));
+            }
+        }
+        oweSuper.setList(list);
+
         OaEosFlowItem item = new OaEosFlowItem();
-        model.addAttribute("gsons", Global.wxusermap);
-        if (oaWxBxCorrelationSuper.getOaWxExtendedSuper().getFlow() != null) {
-            item.setFlowId(oaWxBxCorrelationSuper.getOaWxExtendedSuper().getFlow().getId());
+        if (oweSuper.getFlow() != null) {
+            item.setFlowId(oweSuper.getFlow().getId());
             TreeMap<Integer, List<OaEosFlowItem>> maps = oaEosFlowItemService.findListByFlowId(item);
             model.addAttribute("flowmap", maps);
             model.addAttribute("flow", new OaEosFlow());
-
             if (user != null) {
-
-                   oaEosFlowItemService.FlowUsers(maps); //找到要处理的流程
-
+                oaEosFlowItemService.FlowUsers(maps); //找到要处理的流程
                 List<OaEosFlowItem> oeflsit = oaEosFlowItemService.FlowUsers(maps);
                 for (OaEosFlowItem oflow : oeflsit) {
                     if (oflow.getUser().getId().equals(user.getUserId())) {
@@ -487,26 +482,24 @@ public class WeixinbxControllerTwo extends BaseController {
                 }
             }
         }
-        oaWxBxCorrelationSuper.getOaWxExtendedSuper().setUpdateBy(userDao.get(oaWxBxCorrelationSuper.getOaWxExtendedSuper().getUpdateBy().getId()));
-        model.addAttribute("map", oaWxBxCorrelationSuper);
-        model.addAttribute("user",UserUtils.get(oaWxBxCorrelationSuper.getCreateBy().getId()));
-        model.addAttribute("cost", cost);
-        model.addAttribute("types", type);
+        model.addAttribute("oweSuper", oweSuper);
+        model.addAttribute("user",userDao.get(oweSuper.getCreateBy().getId()));
+        model.addAttribute("cost", mocey);
+        model.addAttribute("types", oweSuper.getProItemType());
         model.addAttribute("site", site);
         model.addAttribute("sh",sh);
-        if ("bm".equals(type)) {
+        model.addAttribute("gsons", Global.wxusermap);
+        if ("bm".equals(oweSuper.getProItemType())) {
             return "modules/cms/front/themes/" + site.getTheme() + "/baoxiao/jiben/frontBaoxiaoDetailsOtherBm";
-        } else if ("fxs".equals(type)) {
+        } else if ("fxs".equals(oweSuper.getProItemType())) {
             return "modules/cms/front/themes/" + site.getTheme() + "/baoxiao/jiben/frontBaoxiaoDetailsOtherFxs";
-        } else if ("ylx".equals(type)){
+        } else if ("ylx".equals(oweSuper.getProItemType())){
             return "modules/cms/front/themes/" + site.getTheme() + "/baoxiao/jiben/frontBaoxiaoDetailsOtherYlx";
-        }else if ("lx".equals(type)){
+        }else if ("lx".equals(oweSuper.getProItemType())) {
             return "modules/cms/front/themes/" + site.getTheme() + "/baoxiao/jiben/frontBaoxiaoDetailsOtherLx";
-        }else{
-            return "";
         }
+        return "";
     }
-
     /**
      * 审核通过跳转的方法
      *
@@ -714,54 +707,55 @@ public class WeixinbxControllerTwo extends BaseController {
                 ks="2019-1-1";
             }
             if (StringUtils.isEmpty(js)){
-                ks="2019-4-26";
+                js=DateUtils.formatDateTime(new java.util.Date());
             }
              ks = ks.replace(",","-");
             js = js.replace(",","-");
-            Page<OaWxBxCorrelationSuper> page = oaWxBxCorrelationSuperService.findFinanceExcel(new Page<OaWxBxCorrelationSuper>(request, response),ks, js,oaWxBxCorrelationSuper);
+            OaWxExtendedSuper pwesuper=new OaWxExtendedSuper();
+            pwesuper.setStarttime(ks);
+            pwesuper.setEndtime(js);
+            pwesuper.setRbsType("0");
+            pwesuper.setCw(true);
+            List<OaWxExtendedSuper> page = oaWxExtendedSuperService.findList(pwesuper);
              List<FinanceExcel> list=new ArrayList<FinanceExcel>();
-            for (OaWxBxCorrelationSuper ite: page.getList()) {
+            for (OaWxExtendedSuper ite: page) {
                 FinanceExcel financeExcel=new FinanceExcel();
                 double mocey = 0;
-                OaWxBxCorrelation OaWxBxCorrelation=new OaWxBxCorrelation();
-                OaWxBxCorrelation.setOaWxBxCorrelationSuper(ite);
-                OaWxExtendedSuper oa=new OaWxExtendedSuper();
-                oa.setId(ite.getExtendedSuperId());
                 OaWxExtended oaWxExtended=new OaWxExtended();
-                oaWxExtended.setOaWxExtendedSuper(oa);
+                oaWxExtended.setOaWxExtendedSuper(ite);
                 List<OaWxExtended> owelist=oaWxExtendedService.findBySuperProId(oaWxExtended);
                 for (OaWxExtended i :owelist){
                     mocey += i.getCost();
                 }
                 financeExcel.setUserName(UserUtils.get(ite.getCreateBy().getId()).getName());
-                if (ite.getOaWxExtendedSuper().getProItemType().equals("ylx")) {
+                if (ite.getProItemType().equals("ylx")) {
                     ite.setPro( oaEosProService.get(ite.getProId()));
-                    ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
+                    ite.setPro( oaEosProService.get(ite.getProId()));
                     financeExcel.setProName(ite.getPro().getName());
                     financeExcel.setProid(ite.getPro().getId());
                     financeExcel.setPaProid(ite.getPro().getPaNumber());
-                } else if (ite.getOaWxExtendedSuper().getProItemType().equals("lx")) {
+                } else if (ite.getProItemType().equals("lx")) {
                     ite.setPro( oaEosProService.get(ite.getProId()));
-                    ite.getOaWxExtendedSuper().setPro( oaEosProService.get(ite.getProId()));
+                    ite.setPro( oaEosProService.get(ite.getProId()));
                     financeExcel.setProName(ite.getPro().getName());
                     financeExcel.setProid(ite.getPro().getId());
                     financeExcel.setPaProid(ite.getPro().getPaNumber());
                     financeExcel.setProProid(ite.getPro().getProNumber());
-                } else if (ite.getOaWxExtendedSuper().getProItemType().equals("bm")) {
-                    ite.getOaWxExtendedSuper().setOaWxDepartment(oaWxDepartmentService.get(ite.getProId()));
-                    financeExcel.setProName(ite.getOaWxExtendedSuper().getOaWxDepartment().getName());
-                    financeExcel.setProid(ite.getOaWxExtendedSuper().getOaWxDepartment().getId());
-                } else if (ite.getOaWxExtendedSuper().getProItemType().equals("fxs")) {
-                    ite.setUn( oaEosProUnService.get(ite.getProId()));
-                    ite.getOaWxExtendedSuper().setOaEosProUn( oaEosProUnService.get(ite.getProId()));
-                    financeExcel.setProid(ite.getOaWxExtendedSuper().getOaEosProUn().getId());
-                    financeExcel.setProProid(ite.getOaWxExtendedSuper().getOaEosProUn().getProNumber());
-                    financeExcel.setProName(ite.getOaWxExtendedSuper().getOaEosProUn().getName());
+                } else if (ite.getProItemType().equals("bm")) {
+                    ite.setOaWxDepartment(oaWxDepartmentService.get(ite.getProId()));
+                    financeExcel.setProName(ite.getOaWxDepartment().getName());
+                    financeExcel.setProid(ite.getOaWxDepartment().getId());
+                } else if (ite.getProItemType().equals("fxs")) {
+                    ite.setOaEosProUn( oaEosProUnService.get(ite.getProId()));
+                    ite.setOaEosProUn( oaEosProUnService.get(ite.getProId()));
+                    financeExcel.setProid(ite.getOaEosProUn().getId());
+                    financeExcel.setProProid(ite.getOaEosProUn().getProNumber());
+                    financeExcel.setProName(ite.getOaEosProUn().getName());
                 }
                 financeExcel.setMoney(mocey);
-                financeExcel.setState(ite.getOaWxExtendedSuper().getState().equals("0") ? "待审核" : ite.getOaWxExtendedSuper().getState().equals("1") ? "审核通过" : ite.getOaWxExtendedSuper().getState().equals("-1") ? "已驳回" : ite.getOaWxExtendedSuper().getState().equals("2") ? "已撤销" : "出现异常请联系系统管理员");
+                financeExcel.setState(ite.getState().equals("0") ? "待审核" : ite.getState().equals("1") ? "审核通过" : ite.getState().equals("-1") ? "已驳回" : ite.getState().equals("2") ? "已撤销" : "出现异常请联系系统管理员");
                 financeExcel.setCreateDate(ite.getCreateDate());
-                financeExcel.setType(ite.getOaWxExtendedSuper().getProItemType().equals("lx")?"立项":ite.getOaWxExtendedSuper().getProItemType().equals("ylx")?"预立项":ite.getOaWxExtendedSuper().getProItemType().equals("fxs")?"非销售立项":ite.getOaWxExtendedSuper().getProItemType().equals("bm")?"部门":"系统异常");
+                financeExcel.setType(ite.getProItemType().equals("lx")?"立项":ite.getProItemType().equals("ylx")?"预立项":ite.getProItemType().equals("fxs")?"非销售立项":ite.getProItemType().equals("bm")?"部门":"系统异常");
 
                 list.add(financeExcel);
             }

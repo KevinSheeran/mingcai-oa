@@ -117,13 +117,13 @@
     <a class="mui-tab-item" href="#tabbar-with-contact">
         <div class="audit mui-icon-extra">
             <c:if test="${financeAuditRole}">
-                <c:if test="${pd.prostartcount+pd.procount+pd.extendedstartcount+pd.extendedcount+pd.extendedcount1+pd.prouncount+pd.appropriationcount+pd.appropriationcount1+pd.accountcount>0}">
-                    <span class="mui-badge">${pd.prostartcount+pd.procount+pd.extendedstartcount+pd.extendedcount+pd.extendedcount1+pd.prouncount+pd.appropriationcount+pd.appropriationcount1+pd.accountcount}</span>
+                <c:if test="${pd.prostartcount+pd.procount+pd.extendedstartcount+pd.extendedcount+pd.extendedcount1+pd.prouncount+pd.appropriationcount+pd.appropriationcount1>0}">
+                    <span class="mui-badge">${pd.prostartcount+pd.procount+pd.extendedstartcount+pd.extendedcount+pd.extendedcount1+pd.prouncount+pd.appropriationcount+pd.appropriationcount1}</span>
                 </c:if>
             </c:if>
                <c:if test="${!financeAuditRole}">
-                   <c:if test="${pd.prostartcount+pd.procount+pd.extendedstartcount+pd.extendedcount+pd.extendedcount1+pd.prouncount+pd.accountcount>0}">
-                       <span class="mui-badge">${pd.prostartcount+pd.procount+pd.extendedstartcount+pd.extendedcount1+pd.extendedcount+pd.prouncount+pd.accountcount}</span>
+                   <c:if test="${pd.prostartcount+pd.procount+pd.extendedstartcount+pd.extendedcount+pd.extendedcount1+pd.prouncount>0}">
+                       <span class="mui-badge">${pd.prostartcount+pd.procount+pd.extendedstartcount+pd.extendedcount1+pd.extendedcount+pd.prouncount}</span>
                    </c:if>
                </c:if>
         </div>
@@ -173,19 +173,19 @@
                 </div>
                 <div class="aui-nav-title">采购</div>
                 <div class="aui-class-list-box">
-                    <a href="${oa}/weixin/bx/caigou?types=ylx" class="">
+                    <a href="${oa}/weixin/bx/caigou?types=ylx" class="disabled">
                         <div class="aui-box">
                             <img src="${ctxStatic}/modules/cms/front/themes/weixin/icon/供应商预付款.png" alt="">
                             <div class="name">销售预立项</div>
                         </div>
                     </a>
-                    <a href="${oa}/weixin/bx/caigou?types=lx" class="">
+                    <a href="${oa}/weixin/bx/caigou?types=lx" class="disabled">
                         <div class="aui-box">
                             <img src="${ctxStatic}/modules/cms/front/themes/weixin/icon/单据申请.png" alt="">
                             <div class="name">销售立项</div>
                         </div>
                     </a>
-                    <a href="${oa}/weixin/bx/caigou?types=fxs" class="">
+                    <a href="${oa}/weixin/bx/caigou?types=fxs" class="disabled">
                         <div class="aui-box">
                             <img src="${ctxStatic}/modules/cms/front/themes/weixin/icon/单据申请.png" alt="">
                             <div class="name">非销售立项</div>
@@ -298,7 +298,7 @@
                             </div>
                             <div class="aui-nav-title">采购处理</div>
                             <div class="aui-class-list-box">
-                                <a href="${oa}/weixin/bx/tz?types=sh" class="">
+                                <a href="${oa}/weixin/bx/tz?types=sh" class="disabled">
                                     <div class="aui-box">
                                         <img src="${ctxStatic}/modules/cms/front/themes/weixin/icon/单据签收.png" alt="">
                                         <div class="name">采购审批</div>
@@ -340,7 +340,7 @@
                                         </c:if>
                                     </div>
                                 </a>
-                                <a href="${oa}/weixin/bx/tz?types=cw" class="">
+                                <a href="${oa}/weixin/bx/tz?types=cw" class="disabled">
                                     <div class="aui-box">
                                         <img src="${ctxStatic}/modules/cms/front/themes/weixin/icon/单据支付.png" alt="">
                                         <div class="name">采购审批</div>
@@ -390,19 +390,19 @@
                             </div>
                             <div class="aui-nav-title">采购</div>
                             <div class="aui-class-list-box">
-                                <a href="${oa}/weixin/bx/tz?types=ysh" class="">
+                                <a href="${oa}/weixin/bx/tz?types=ysh" class="disabled">
                                     <div class="aui-box">
                                         <img src="${ctxStatic}/modules/cms/front/themes/weixin/icon/请假单确认.png" alt="">
-                                        <div class="name">报销</div>
+                                        <div class="name">处理记录</div>
                                     </div>
                                 </a>
                             </div>
-                            <div class="aui-nav-title">基本</div>
+                            <div class="aui-nav-title">报销</div>
                             <div class="aui-class-list-box">
                                 <a href="${oa}/weixin/two/tz?types=ysh" class="">
                                     <div class="aui-box">
                                         <img src="${ctxStatic}/modules/cms/front/themes/weixin/icon/请假单确认.png" alt="">
-                                        <div class="name">报销</div>
+                                        <div class="name">处理记录</div>
                                     </div>
                                 </a>
                                 <!--
