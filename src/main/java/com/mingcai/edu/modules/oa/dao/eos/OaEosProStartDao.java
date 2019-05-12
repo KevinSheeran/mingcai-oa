@@ -5,7 +5,6 @@ package com.mingcai.edu.modules.oa.dao.eos;
 
 import com.mingcai.edu.common.persistence.CrudDao;
 import com.mingcai.edu.common.persistence.annotation.MyBatisDao;
-import com.mingcai.edu.modules.oa.entity.eos.OaEosPro;
 import com.mingcai.edu.modules.oa.entity.eos.OaEosProStart;
 
 import java.util.List;
@@ -24,4 +23,6 @@ public interface OaEosProStartDao extends CrudDao<OaEosProStart> {
 	public List<OaEosProStart> findListByUser(OaEosProStart oep);
 	public List<OaEosProStart> findPcList(OaEosProStart start);
 	void updatamoney(OaEosProStart oaEosPro);
+	//查询立项项目
+    public  List<OaEosProStart> findStartProgram(OaEosProStart oaEosProStart);
 }

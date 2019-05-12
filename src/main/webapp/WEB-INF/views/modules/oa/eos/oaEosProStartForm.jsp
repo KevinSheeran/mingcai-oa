@@ -296,7 +296,10 @@
 			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="window.location.href='${ctx}/oa/eos/oaEosProStart/index'"/>
 		</div>
 		<c:if test="${oaEosPro.id!=null}">
-			<h4 style="padding: 10px 0">立项子项目&nbsp;&nbsp;<c:if test="${oaEosProStart.status==0||proedit}"><button class="btn " type="button" onclick="addProItem('${oaEosPro.id}')"><i class="icon-plus"></i>&nbsp;&nbsp;添加子项目</button> <eos:treeselect id="xzItem" checked="true"  name="userIds" value="${oaEosProStart.userIds}"  labelName="oaEosProStart.users_names" labelValue="${oaEosProStart.users_names}" extId="${oaEosProStart.id}"
+			<h4 style="padding: 10px 0">立项子项目&nbsp;&nbsp;<c:if test="${oaEosProStart.status==0||proedit}">
+			<button class="btn " type="button" onclick="addProItem('${oaEosPro.id}')"><i class="icon-plus"></i>&nbsp;&nbsp;添加子项目</button>
+			<eos:treeselect id="xzItem" checked="true"  name="userIds" value="${oaEosProStart.userIds}"  
+			labelName="oaEosProStart.users_names" labelValue="${oaEosProStart.users_names}" extId="${oaEosProStart.id}"
 																																																																																								  title="子项目" url="/oa/eos/oaEosPro/itemThmplate" isAll="true" notAllowSelectRoot="true"  notAllowSelectParent="true" cssClass="required"/>   </c:if></h4>
 
 			<table id="contentTable" class="table table-striped table-bordered table-condensed">

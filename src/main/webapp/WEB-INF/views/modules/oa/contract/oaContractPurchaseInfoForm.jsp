@@ -125,7 +125,8 @@
 			<tr>
 				<td colspan="4" style="padding-left:15px;">
 					<c:if test="${oaContractPurchaseInfo.id!=null&&oaContractPurchaseInfo.id!=''}">
-						<iframe src="${ctx}/oa/contract/oaContractInvoice?contractId=${oaContractPurchaseInfo.id}" name="invoice" id="invoice" style="overflow:visible;" scrolling="yes" frameborder="no" width="100%" height="250">
+						<iframe src="${ctx}/oa/contract/oaContractInvoice?contractId=${oaContractPurchaseInfo.id}" name="invoice" id="invoice" 
+						style="overflow:visible;" scrolling="yes" frameborder="no" width="100%" height="250">
 
 						</iframe>
 					</c:if>

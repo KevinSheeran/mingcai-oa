@@ -3,8 +3,6 @@
  */
 package com.mingcai.edu.modules.oa.entity.eos;
 
-import org.hibernate.validator.constraints.Length;
-
 import com.mingcai.edu.common.persistence.DataEntity;
 
 import java.util.List;

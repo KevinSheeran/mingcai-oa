@@ -3,13 +3,9 @@
  */
 package com.mingcai.edu.modules.oa.entity.wx;
 
-import com.mingcai.edu.modules.oa.entity.user.OaUserAccount;
+import com.mingcai.edu.common.persistence.DataEntity;
 import com.mingcai.edu.modules.sys.entity.User;
 import org.hibernate.validator.constraints.Length;
-
-import com.mingcai.edu.common.persistence.DataEntity;
-
-import java.util.TreeMap;
 
 /**
  * 微信用户Entity
@@ -44,14 +40,14 @@ public class OaWxUsers extends DataEntity<OaWxUsers> {
 	private String qrCode;
 	private String pinyin;//全拼
 	private User user;
-	private OaUserAccount account;
-	public OaUserAccount getAccount() {
+	/*private OaUserAccount account;*/
+	/*public OaUserAccount getAccount() {
 		return account;
 	}
 
 	public void setAccount(OaUserAccount account) {
 		this.account = account;
-	}
+	}*/
 	public User getUser() {
 		return user;
 	}

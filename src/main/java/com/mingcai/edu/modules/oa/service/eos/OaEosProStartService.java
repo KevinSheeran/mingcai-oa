@@ -3,23 +3,18 @@
  */
 package com.mingcai.edu.modules.oa.service.eos;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import com.google.gson.Gson;
 import com.mingcai.edu.common.persistence.DataEntity;
+import com.mingcai.edu.common.persistence.Page;
+import com.mingcai.edu.common.service.CrudService;
 import com.mingcai.edu.common.utils.DateUtils;
 import com.mingcai.edu.common.utils.IdGen;
 import com.mingcai.edu.common.utils.StringUtils;
 import com.mingcai.edu.common.utils.TableUpdateLog.UnityLog;
-import com.mingcai.edu.modules.oa.dao.eos.OaEosFlowDao;
 import com.mingcai.edu.modules.oa.dao.eos.OaEosFlowsDao;
 import com.mingcai.edu.modules.oa.dao.eos.OaEosProDao;
+import com.mingcai.edu.modules.oa.dao.eos.OaEosProStartDao;
 import com.mingcai.edu.modules.oa.entity.eos.*;
 import com.mingcai.edu.modules.oa.service.user.OaUserAccountService;
-import com.mingcai.edu.modules.sys.dao.LogDao;
 import com.mingcai.edu.modules.sys.dao.UserDao;
 import com.mingcai.edu.modules.sys.entity.User;
 import com.mingcai.edu.modules.sys.utils.UserUtils;
@@ -27,11 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mingcai.edu.common.persistence.Page;
-import com.mingcai.edu.common.service.CrudService;
-import com.mingcai.edu.modules.oa.dao.eos.OaEosProStartDao;
-
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * 立项启动Service
@@ -69,6 +64,9 @@ public class OaEosProStartService extends CrudService<OaEosProStartDao, OaEosPro
         oaEosProStart.setPage(page);
         page.setList(dao.findListByFlowFinishUser(oaEosProStart));
         return page;
+    }
+    public List<OaEosProStart> findStartProgram(OaEosProStart oaEosProStart){
+        return startDao.findStartProgram(oaEosProStart);
     }
 	public Page<OaEosProStart> findPage(Page<OaEosProStart> page, OaEosProStart oaEosProStart) {
 		return super.findPage(page, oaEosProStart);

@@ -17,8 +17,6 @@ if (Servlets.isAjaxRequest(request)) {
 else {
 %>
 <%@page import="com.mingcai.edu.common.web.Servlets"%>
-<%@page import="com.mingcai.edu.utils.Exceptions"%>
-<%@page import="com..mingcai.edu.common.utils.StringUtils"%>
 <%@page contentType="text/html;charset=UTF-8" isErrorPage="true"%>
 <%@include file="/WEB-INF/views/include/taglib.jsp"%>
 <!DOCTYPE html>

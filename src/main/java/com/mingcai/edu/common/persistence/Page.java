@@ -49,7 +49,6 @@ public class Page<T> {
 	private String funcParam = ""; // 函数的附加参数，第三个参数值。
 	
 	private String message = ""; // 设置提示消息，显示在“共n条”之后
-
 	public Page() {
 		this.pageSize = -1;
 	}

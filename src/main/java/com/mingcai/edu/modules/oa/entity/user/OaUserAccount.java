@@ -3,16 +3,13 @@
  */
 package com.mingcai.edu.modules.oa.entity.user;
 
-import javax.validation.constraints.NotNull;
-
-import com.mingcai.edu.common.utils.weixinApi.WxUsers;
+import com.mingcai.edu.common.persistence.DataEntity;
 import com.mingcai.edu.modules.oa.entity.eos.OaEosFlowItem;
 import com.mingcai.edu.modules.oa.entity.wx.OaWxUsers;
 import com.mingcai.edu.modules.sys.entity.User;
 import org.hibernate.validator.constraints.Length;
 
-import com.mingcai.edu.common.persistence.DataEntity;
-
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**

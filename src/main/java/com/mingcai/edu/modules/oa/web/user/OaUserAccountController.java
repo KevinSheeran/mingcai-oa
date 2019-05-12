@@ -3,20 +3,20 @@
  */
 package com.mingcai.edu.modules.oa.web.user;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.mingcai.edu.common.utils.PageData;
-import com.mingcai.edu.modules.oa.entity.eos.OaEosFlow;
+import com.mingcai.edu.common.config.Global;
+import com.mingcai.edu.common.persistence.Page;
+import com.mingcai.edu.common.utils.StringUtils;
+import com.mingcai.edu.common.web.BaseController;
 import com.mingcai.edu.modules.oa.entity.eos.OaEosFlowItem;
 import com.mingcai.edu.modules.oa.entity.eos.OaEosPro;
+import com.mingcai.edu.modules.oa.entity.user.OaUserAccount;
 import com.mingcai.edu.modules.oa.entity.user.OaUserAccountLog;
 import com.mingcai.edu.modules.oa.entity.user.OaUserSalesVolume;
 import com.mingcai.edu.modules.oa.entity.wx.OaWxUsers;
 import com.mingcai.edu.modules.oa.service.eos.OaEosFlowItemService;
 import com.mingcai.edu.modules.oa.service.eos.OaEosProService;
 import com.mingcai.edu.modules.oa.service.user.OaUserAccountLogService;
-import com.mingcai.edu.modules.oa.service.user.OaUserSalesVolumeService;
+import com.mingcai.edu.modules.oa.service.user.OaUserAccountService;
 import com.mingcai.edu.modules.oa.service.wx.OaWxUsersService;
 import com.mingcai.edu.modules.sys.entity.Role;
 import com.mingcai.edu.modules.sys.entity.User;
@@ -31,16 +31,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.mingcai.edu.common.config.Global;
-import com.mingcai.edu.common.persistence.Page;
-import com.mingcai.edu.common.web.BaseController;
-import com.mingcai.edu.common.utils.StringUtils;
-import com.mingcai.edu.modules.oa.entity.user.OaUserAccount;
-import com.mingcai.edu.modules.oa.service.user.OaUserAccountService;
-
-import java.util.HashMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -127,7 +120,7 @@ public class OaUserAccountController extends BaseController {
 		for(OaWxUsers user:page){
 			if(user.getUser()!=null) {
 				OaUserAccount account = oaUserAccountService.get(user.getUser().getId());
-				user.setAccount(account);
+				//user.setAccount(account);
 			}
 		}
 		model.addAttribute("page", page);

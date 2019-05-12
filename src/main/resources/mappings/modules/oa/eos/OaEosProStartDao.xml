@@ -138,6 +138,24 @@
 			</otherwise>
 		</choose>
 	</select>
+    <select id="findStartProgram" resultType="OaEosProStart">
+        SELECT
+        <include refid="oaEosProStartColumns"/>
+        FROM oa_eos_pro_start a
+        <include refid="oaEosProStartJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+            AND a.status=2
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.create_date DESC
+            </otherwise>
+        </choose>
+    </select>
 	<select id="findPcList" resultType="OaEosProStart">
 		SELECT
 		<include refid="oaEosProStartColumns"/>

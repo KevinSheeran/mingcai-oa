@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingcai.edu.modules.oa.dao.proc.OaProcInventoryDao">
+    
+	<sql id="oaProcInventoryColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.specifications AS "specifications",
+		a.type AS "type",
+		a.apply_id AS "applyId",
+		a.price AS "price",
+		a.num AS "num",
+		a.pro_id AS "proId",
+		a.pro_item_id AS "proItemId",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="oaProcInventoryJoins">
+		LEFT JOIN oa_eos_pro_start_item oepsi on oepsi.id =a.pro_item_id
+	</sql>
+    
+	<select id="get" resultType="OaProcInventory">
+		SELECT 
+			<include refid="oaProcInventoryColumns"/>
+		FROM oa_proc_inventory a
+		<include refid="oaProcInventoryJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="OaProcInventory">
+		SELECT 
+			<include refid="oaProcInventoryColumns"/>
+		FROM oa_proc_inventory a
+		<include refid="oaProcInventoryJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="applyId != null and applyId != ''">
+				AND a.apply_id = #{applyId}
+			</if>
+			<if test="proItemId != null and proItemId != ''">
+				AND a.pro_item_id = #{proItemId}
+			</if>
+			<if test="proId != null and proId != ''">
+				AND a.pro_id = #{proId}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="OaProcInventory">
+		SELECT 
+			<include refid="oaProcInventoryColumns"/>
+		FROM oa_proc_inventory a
+		<include refid="oaProcInventoryJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO oa_proc_inventory(
+			id,
+			name,
+			specifications,
+			type,
+			apply_id,
+			price,
+			num,
+			pro_id,
+			pro_item_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{specifications},
+			#{type},
+			#{applyId},
+			#{price},
+			#{num},
+			#{proId},
+			#{proItemId},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE oa_proc_inventory SET 	
+			name = #{name},
+			specifications = #{specifications},
+			type = #{type},
+			apply_id = #{applyId},
+			price = #{price},
+			num = #{num},
+			pro_id = #{proId},
+			pro_item_id = #{proItemId},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE oa_proc_inventory SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
