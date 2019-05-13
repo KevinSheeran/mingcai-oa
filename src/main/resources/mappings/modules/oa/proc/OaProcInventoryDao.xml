@@ -12,6 +12,7 @@
 		a.num AS "num",
 		a.pro_id AS "proId",
 		a.pro_item_id AS "proItemId",
+		oepsi.name AS "oaEosProStartItem.name",
 		a.create_by AS "createBy.id",
 		a.create_date AS "createDate",
 		a.update_by AS "updateBy.id",
@@ -54,6 +55,9 @@
 			<if test="proId != null and proId != ''">
 				AND a.pro_id = #{proId}
 			</if>
+			<if test="flag">
+				AND( a.pro_item_id = '' or a.pro_item_id IS NULL)
+			</if>
 		</where>
 		<choose>
 			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
@@ -88,7 +92,7 @@
 			id,
 			name,
 			specifications,
-			type,
+			`type`,
 			apply_id,
 			price,
 			num,
@@ -123,7 +127,7 @@
 		UPDATE oa_proc_inventory SET 	
 			name = #{name},
 			specifications = #{specifications},
-			type = #{type},
+			`type` = #{type},
 			apply_id = #{applyId},
 			price = #{price},
 			num = #{num},

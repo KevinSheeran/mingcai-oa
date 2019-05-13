@@ -20,7 +20,7 @@
 	<fieldset>
 	<legend>
 		<div style="padding: 10px 10px; text-align: left ">
-			<a href="${ctx}/oa/proc/oaProcApplylist/">采购列表</a>&nbsp;&nbsp;
+			<a href="${ctx}/oa/proc/oaProcApplylist/">采购申请列表</a>&nbsp;&nbsp;
 			<shiro:hasPermission name="sys:menu:edit">
 			<a class="btn" href="${ctx}/oa/proc/oaProcApplylist/form"><i class="icon-plus"></i>&nbsp;添加请购单</a>
 		</shiro:hasPermission></div>
@@ -65,8 +65,13 @@
 		<tbody>
 		<c:forEach items="${page.list}" var="oaProcApplylist">
 			<tr>
-				<td><a href="${ctx}/oa/proc/oaProcApplylist/form?proId=${oaProcApplylist.proId}">
-					${oaProcApplylist.proId}
+				<td><a href="${ctx}/oa/proc/oaProcApplylist/form?id=${oaProcApplylist.id}">
+					<c:if test="${oaProcApplylist.oaEosPro.proNumber==null||oaProcApplylist.oaEosPro.proNumber==''}">
+						${oaProcApplylist.oaEosPro.paNumber}
+					</c:if>
+					<c:if test="${oaProcApplylist.oaEosPro.proNumber!=null||oaProcApplylist.oaEosPro.proNumber!=''}">
+						${oaProcApplylist.oaEosPro.proNumber}
+					</c:if>
 				</a></td>
 				<td>
 						${oaProcApplylist.oaEosPro.name}
@@ -81,23 +86,47 @@
 					<fmt:formatDate value="${oaProcApplylist.updateDate}" pattern="yyyy-MM-dd HH:mm:ss"/>
 				</td>
 				<td>
-					<c:if test="${oaProcApplylist.fflowId==null||oaProcApplylist.fflowId==''}">
-						未审批
+					<c:if test="${oaProcApplylist.fstatus=='0'}">
+						未提交
 					</c:if>
-					<c:if test="${oaProcApplylist.fflowId!=NULL&&oaProcApplylist.fflowId!=''}">
+					<c:if test="${oaProcApplylist.fstatus=='1'}">
+						申请中
+					</c:if>
+					<c:if test="${oaProcApplylist.fstatus=='2'}">
 						已通过
+					</c:if>
+					<c:if test="${oaProcApplylist.fstatus=='-1'}">
+						驳回
 					</c:if>
 				</td>
 				<td>
-					<c:if test="${oaProcApplylist.sflowId==null||oaProcApplylist.sflowId==''}">
-						未审批
+					<c:if test="${oaProcApplylist.sstatus=='0'}">
+						未提交
 					</c:if>
-					<c:if test="${oaProcApplylist.sflowId!=NULL&&oaProcApplylist.sflowId!=''}">
+					<c:if test="${oaProcApplylist.sstatus=='1'}">
+						申请中
+					</c:if>
+					<c:if test="${oaProcApplylist.sstatus=='2'}">
 						已通过
 					</c:if>
+					<c:if test="${oaProcApplylist.sstatus=='-1'}">
+						驳回
+					</c:if>
+
 				</td>
 				<td>
-					${oaProcApplylist.financeStatus}
+					<c:if test="${oaProcApplylist.financeStatus==0||oaProcApplylist.financeStatus==0}">
+						未提交
+					</c:if>
+					<c:if test="${oaProcApplylist.financeStatus==1&&oaProcApplylist.financeStatus==1}">
+						申请中
+					</c:if>
+					<c:if test="${oaProcApplylist.financeStatus==2||oaProcApplylist.financeStatus==2}">
+						已通过
+					</c:if>
+					<c:if test="${oaProcApplylist.financeStatus==-1||oaProcApplylist.financeStatus==-1}">
+						驳回
+					</c:if>
 				</td>
 				<td>
 					<fmt:formatDate value="${oaProcApplylist.updateDate}" pattern="yyyy-MM-dd HH:mm:ss"/>

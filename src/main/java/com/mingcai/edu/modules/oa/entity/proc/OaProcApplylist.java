@@ -20,8 +20,8 @@ public class OaProcApplylist extends DataEntity<OaProcApplylist> {
     private String fflowId ;		// 第一个流程ID
 	private String sflowId ;		// 第二个流程ID
 	private String applyUserId;		// 请购人ID
-	private String fStatus = "0";		// 第一个人审批状态(默认0,1.申请中，2.通过.-1驳回)
-	private String sStatus = "0";		// 第二个人审批状态(默认0,1.申请中，2.通过.-1驳回)
+	private String fstatus = "0";		// 第一个人审批状态(默认0,1.申请中，2.通过.-1驳回)
+	private String sstatus = "0";		// 第二个人审批状态(默认0,1.申请中，2.通过.-1驳回)
 	private String financeStatus = "0";		// 财务审批状态(默认0,1.申请中，2.通过.-1驳回)
 	private User user;       //系统用户
 	private OaEosPro oaEosPro; //项目
@@ -42,7 +42,21 @@ public class OaProcApplylist extends DataEntity<OaProcApplylist> {
         this.fflowId = fflowId;
         return this;
     }
+	public String getFstatus() {
+		return fstatus;
+	}
 
+	public void setFstatus(String fstatus) {
+		this.fstatus = fstatus;
+	}
+
+	public String getSstatus() {
+		return sstatus;
+	}
+
+	public void setSstatus(String sstatus) {
+		this.sstatus = sstatus;
+	}
     public String getSflowId() {
         return sflowId;
     }
@@ -87,23 +101,6 @@ public class OaProcApplylist extends DataEntity<OaProcApplylist> {
 	public void setApplyUserId(String applyUserId) {
 		this.applyUserId = applyUserId;
 	}
-	
-	public String getFStatus() {
-		return fStatus;
-	}
-
-	public void setFStatus(String fStatus) {
-		this.fStatus = fStatus;
-	}
-	
-	public String getSStatus() {
-		return sStatus;
-	}
-
-	public void setSStatus(String sStatus) {
-		this.sStatus = sStatus;
-	}
-	
 	public String getFinanceStatus() {
 		return financeStatus;
 	}

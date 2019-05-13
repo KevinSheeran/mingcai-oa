@@ -83,6 +83,14 @@ public class OaEosProService extends CrudService<OaEosProDao, OaEosPro> {
 		return dao.procount(pd);
 	}
 
+	/**
+	 * 查找所有销售项目
+	 * @param oaEosPro
+	 * @return
+	 */
+	public List<OaEosPro> findEosPro(OaEosPro oaEosPro){
+		return dao.findEosPro(oaEosPro);
+	};
 	//保存流程
 	@Transactional(readOnly = false)
 	public String saveAudit(OaEosPro oaEosPro) {
@@ -206,7 +214,7 @@ public class OaEosProService extends CrudService<OaEosProDao, OaEosPro> {
 		}
 		this.getAllPro();
 	}
-	
+
 	@Transactional(readOnly = false)
 	public void delete(OaEosPro oaEosPro) {
 		super.delete(oaEosPro);

@@ -66,6 +66,26 @@
 	</select>
 
 
+	<select id="findEosPro" resultType="OaEosPro">
+		SELECT
+		<include refid="oaEosProColumns"/>
+		FROM oa_eos_pro a
+		<include refid="oaEosProJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			AND (a.status=3 or a.status=5)
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+
 	<select id="findListByFlowFinishUser" resultType="OaEosPro">
 		SELECT
 		<include refid="oaEosProColumns"/>,

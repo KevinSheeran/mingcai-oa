@@ -2,7 +2,7 @@
 <%@ include file="/WEB-INF/views/include/taglib.jsp"%>
 <html>
 <head>
-	<title>采购合同关联管理</title>
+	<title>采购管理</title>
 	<meta name="decorator" content="default"/>
 	<style>
 		.items{
@@ -37,22 +37,22 @@
 		<input type="text" id="searchVal"/>
 		<button onclick="search();" class="btn ">搜索</button>
 	</div>
-	<div class="warp">注意：已经生成的采购清单不可取消，如需取消请在清单列表中直接删除</div>
-	<form:form id="inputForm" modelAttribute="oaContractPurchaseTerms" action="${ctx}/oa/contract/oaContractPurchaseInfo/save" method="post" class="form-horizontal">
-		<form:hidden path="purchaseId"/>
-		<form:hidden path="finProductId"/>
+	<form:form id="inputForm" modelAttribute="oaProcInventory" action="${ctx}/oa/proc/oaProcInventoryFormSelectList" method="post" class="form-horizontal">
+		<form:hidden path="id"/>
+		<form:hidden path="proItemId" />
+		<form:hidden path="proId"/>
 		<c:forEach items="${page}" var="item">
 			<div class="items">
 				<label>
-				<input type="checkbox" name="trem" value="${item.tremId}"
-					   <c:if test="${item.id!=null&&item.id!=''}">checked </c:if>
-					   <c:if test="${item.number-item.countNumber==0||item.id!=null&&item.id!=''}">disabled</c:if> />
-					编号：<span>${item.code}</span>&nbsp;
-					产品:<span>${item.name}</span>&nbsp;
-					剩余采购：${item.number-item.countNumber}${item.unit}</label></div>
+					<input type="checkbox" name="item" value="${item.id}"
+							<%--<c:if test="${item.proId!=null&&item.proId!=''}">
+						checked </c:if>--%> />
+					名称：<span>${item.name}</span>&nbsp;规格:<span>${item.specifications}</span>
+				</label>
+			</div>
 		</c:forEach>
 	</form:form>
-<script>
+<script type="application/javascript">
 	function search(){
 		var text=$("#searchVal").val();
 		$(".items").each(function(){
@@ -71,7 +71,6 @@
 
 		})
 	}
-
 </script>
 </body>
 </html>

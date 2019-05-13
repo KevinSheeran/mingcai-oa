@@ -37,4 +37,6 @@ public interface OaEosProDao extends CrudDao<OaEosPro> {
     void updatamoney(OaEosPro oaEosPro);
     //找到销售负责的项目
     public List<OaEosPro> findListByPersonLiableUser(OaEosPro oaEosPro);
+    //查找销售项目
+    public List<OaEosPro> findEosPro(OaEosPro oaEosPro);
 }

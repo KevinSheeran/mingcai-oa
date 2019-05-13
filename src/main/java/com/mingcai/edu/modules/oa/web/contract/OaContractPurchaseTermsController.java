@@ -74,7 +74,6 @@ public class OaContractPurchaseTermsController extends BaseController {
 			}else{
 				terms.setCountNumber(tt.getCountNumber());
 			}
-
 		}
 		model.addAttribute("oaContractPurchaseTerms", oaContractPurchaseTerms);
 		model.addAttribute("page", page);

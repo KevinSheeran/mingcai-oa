@@ -139,7 +139,12 @@
 				<h4 style="padding: 10px 0; padding-left:10px; color: #666;">
 					采购清单
 					<shiro:hasPermission name="oa:contract:oaContractTerms:pay">
-					<c:if test="${oaContractPurchaseInfo.id!=null&&oaContractPurchaseInfo.id!=''}">&nbsp;&nbsp;<a class="btn " style="" onclick="addTrem('${oaContractPurchaseInfo.id}')"><i class="icon-plus"></i>&nbsp;添加采购项</a></c:if></shiro:hasPermission> &nbsp;&nbsp;<span id="totalMoney"></span>
+					<c:if test="${oaContractPurchaseInfo.id!=null&&oaContractPurchaseInfo.id!=''}">
+					&nbsp;&nbsp;
+					<a class="btn " style="" onclick="addTrem('${oaContractPurchaseInfo.id}')">
+						<i class="icon-plus"></i>&nbsp;添加采购项</a>
+					</c:if></shiro:hasPermission>
+					&nbsp;&nbsp;<span id="totalMoney"></span>
 
 				</h4>
 			</tr>
