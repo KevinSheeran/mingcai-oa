@@ -14,9 +14,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,9 +44,15 @@ public class OaProcInventoryController extends BaseController {
 		}
 		return entity;
 	}
-	/*
-	*
-	* */
+
+	/**
+	 *	查询所有数据
+	 * @param oaProcInventory
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
 	@RequiresPermissions("oa:proc:oaProcInventory:view")
 	@RequestMapping(value = {"list", ""})
 	public String list(OaProcInventory oaProcInventory, HttpServletRequest request, HttpServletResponse response, Model model) {
@@ -73,7 +77,6 @@ public class OaProcInventoryController extends BaseController {
 	@RequiresPermissions("oa:proc:oaProcInventory:view")
 	@RequestMapping(value = "form")
 	public String form(OaProcInventory oaProcInventory,Model model) {
-
 		model.addAttribute("oaProcInventory",oaProcInventory);
 		return "modules/oa/proc/oaProcInventoryForm";
 	}
@@ -82,15 +85,15 @@ public class OaProcInventoryController extends BaseController {
 	/*
 	* 保存采购清单信息
 	* */
+	@ResponseBody
 	@RequiresPermissions("oa:proc:oaProcInventory:edit")
-	@RequestMapping(value = "save")
-	public String save(OaProcInventory oaProcInventory, Model model, RedirectAttributes redirectAttributes) {
+	@RequestMapping(value = "save",method = RequestMethod.POST)
+	public String save(OaProcInventory oaProcInventory, Model model) {
 		if (!beanValidator(model, oaProcInventory)){
 			return form(oaProcInventory, model);
 		}
 		oaProcInventoryService.save(oaProcInventory);
-		addMessage(redirectAttributes, "采购清单保存成功");
-		return "redirect:"+Global.getAdminPath()+"/oa/proc/oaProcInventory/?repage";
+		return "success";
 	}
 	/*
 	* 删除采购清单信息

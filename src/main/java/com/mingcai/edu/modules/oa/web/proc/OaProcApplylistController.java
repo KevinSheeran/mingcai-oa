@@ -3,9 +3,11 @@
  */
 package com.mingcai.edu.modules.oa.web.proc;
 
+import com.mingcai.edu.common.beanvalidator.BeanValidators;
 import com.mingcai.edu.common.config.Global;
 import com.mingcai.edu.common.persistence.Page;
 import com.mingcai.edu.common.utils.StringUtils;
+import com.mingcai.edu.common.utils.excel.ImportExcel;
 import com.mingcai.edu.common.web.BaseController;
 import com.mingcai.edu.modules.oa.entity.eos.OaEosProStart;
 import com.mingcai.edu.modules.oa.entity.eos.OaEosProStartItem;
@@ -13,17 +15,22 @@ import com.mingcai.edu.modules.oa.entity.proc.OaProcApplylist;
 import com.mingcai.edu.modules.oa.service.eos.OaEosProStartItemService;
 import com.mingcai.edu.modules.oa.service.eos.OaEosProStartService;
 import com.mingcai.edu.modules.oa.service.proc.OaProcApplylistService;
+import com.mingcai.edu.modules.sys.entity.User;
+import com.mingcai.edu.modules.sys.service.SystemService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 import java.util.Date;
 import java.util.List;
 
@@ -79,6 +86,31 @@ public class OaProcApplylistController extends BaseController {
 		List<OaEosProStartItem> page = oaEosProStartItemService.findList(item);
 		model.addAttribute("page",page);
 		return "modules/oa/proc/oaProcApplylistForm";
+	}
+
+	/**
+	 * 导入清单信息
+	 * @param file
+	 * @param redirectAttributes
+	 * @return
+	 */
+	@RequiresPermissions("oa:proc:oaProcApplylist:edit")
+	@RequestMapping(value = "import", method= RequestMethod.POST)
+	public String importFile(MultipartFile file, RedirectAttributes redirectAttributes) {
+		if(Global.isDemoMode()){
+			addMessage(redirectAttributes, "演示模式，不允许操作！");
+			return "redirect:" + adminPath + "/oa/proc/oaProcApplylist?repage";
+		}
+		try {
+			int successNum = 0;
+			int failureNum = 0;
+			StringBuilder failureMsg = new StringBuilder();
+			ImportExcel ei = new ImportExcel(file, 1, 0);
+
+		}catch(Exception e){
+			addMessage(redirectAttributes,"导入清单信息失败！"+e.getMessage());
+		}
+		return "redirect:" + adminPath + "/oa/proc/oaProcApplylist/?repage";
 	}
 
 	@RequiresPermissions("oa:proc:oaProcApplylist:edit")

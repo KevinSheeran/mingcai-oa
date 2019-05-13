@@ -35,7 +35,9 @@ public class OaProcInventoryService extends CrudService<OaProcInventoryDao, OaPr
 
 
 	@Transactional(readOnly = false)
-	public void save(OaProcInventory oaProcInventory) {
+	public void  save(OaProcInventory oaProcInventory) {
+		oaProcInventory.setProItemId("");
+		oaProcInventory.setProId("");
 		super.save(oaProcInventory);
 	}
 	
