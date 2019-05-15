@@ -112,7 +112,6 @@
 					<c:if test="${oaProcApplylist.sstatus=='-1'}">
 						驳回
 					</c:if>
-
 				</td>
 				<td>
 					<c:if test="${oaProcApplylist.financeStatus==0||oaProcApplylist.financeStatus==0}">

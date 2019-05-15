@@ -22,7 +22,6 @@ public interface OaEosProStartDao extends CrudDao<OaEosProStart> {
 	//找到待审批列表
 	public List<OaEosProStart> findListByUser(OaEosProStart oep);
 	public List<OaEosProStart> findPcList(OaEosProStart start);
-	void updatamoney(OaEosProStart oaEosPro);
-	//查询立项项目
-    public  List<OaEosProStart> findStartProgram(OaEosProStart oaEosProStart);
+
+	public void updatamoney(OaEosProStart oaEosPro);
 }

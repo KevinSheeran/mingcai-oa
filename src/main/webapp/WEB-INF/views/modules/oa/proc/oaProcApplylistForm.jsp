@@ -50,7 +50,7 @@
             <td class="tit">项目：</td>
             <td>
             <form:select path="proId" class="input-xlarge" onchange="getProName(this)">
-                <form:options items="${proStartlist}" itemLabel="pro.name" itemValue="id"  htmlEscape="false"/>
+                <form:options items="${eosProlist}" itemLabel="name" itemValue="id"  htmlEscape="false"/>
             </form:select>
             </td>
            <td class="tit"></td>
@@ -104,12 +104,11 @@
             </tr>
         </shiro:hasPermission>
         <%--子项管理：判断条件：修改时如果该项目存在子项就显示子项列--%>
-
         <c:if test="${oaProcApplylist.proId!=null}">
             <tr>
                 <td colspan="4" >
                     <h4 style="padding: 10px 0; padding-left:10px; color: #666;">清单管理&nbsp;&nbsp;
-                        <a class="btn " onclick="addProcInventory('${oaProcApplylist.proId}')"><i class="icon-plus"></i>&nbsp;添加采购项</a>
+                        <a class="btn " onclick="addProcInventory('${oaProcApplylist.id}')"><i class="icon-plus"></i>&nbsp;添加采购项</a>
                         <input id="btnImport" class="btn btn-primary" type="button" value="导入清单"/>
                     <%--<a class="btn"  id="btnImport">
                         <i class="icon-plus"></i>&nbsp;
@@ -118,7 +117,7 @@
             </tr>
             <tr>
                 <td colspan="4" style="padding-left:15px;" >
-                    <iframe name="list" src="${ctx}/oa/proc/oaProcInventory?applyId=${oaProcApplylist.id}"
+                    <iframe name="list" id="inventoryList" src="${ctx}/oa/proc/oaProcInventory?applyId=${oaProcApplylist.id}"
                             style="overflow:visible;" scrolling="yes" frameborder="no" width="100%" height="250">
                     </iframe>
                 </td>
@@ -133,7 +132,7 @@
             </tr>
             <tr>
                 <td colspan="4" style="padding-left:15px;" >
-                    <iframe name="list" src="${ctx}/oa/proc/oaProcInventory?applyId=${oaProcApplylist.id}&proItemId=${item.id}"
+                    <iframe name="list" id="applyList" src="${ctx}/oa/proc/oaProcInventory?applyId=${oaProcApplylist.id}&proItemId=${item.id}"
                             style="overflow:visible;" scrolling="yes" frameborder="no" width="100%" height="250">
                     </iframe>
                 </td>
@@ -165,7 +164,7 @@
                         $.post("${ctx}/oa/proc/oaProcInventory/save",formdata.serialize(),function(data){
                             if(data=="success"){
                                 loading("提交完成!");
-                                self.location.reload();
+                                document.getElementById('list').contentWindow.location.reload(true);
                             }else{
                                 loading(data);
                             }
@@ -179,13 +178,17 @@
         });
     }
 
-
+    /**
+     * 添加采购项
+     * @param applyId
+     * @param id
+     */
     function addProcInventory(applyId,id){
         var width=$(window).width()/2;
         var height=500;
-        var title="添加采购清单信息";
+        var title="添加采购项信息";
         if(id){
-        title="调整采购清单信息";
+        title="调整采购项信息";
         }else{
         id="";
         }
@@ -198,7 +201,8 @@
                 $.post("${ctx}/oa/proc/oaProcInventory/save",formdata.serialize(),function(data){
                     if(data=="success"){
                         loading("提交完成!");
-                        self.location.reload();
+                        /*self.location.reload();*/
+                      document.getElementById('inventoryList').contentWindow.location.reload();
                     }else{
                         loading(data);
                     }

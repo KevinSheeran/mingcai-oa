@@ -37,7 +37,6 @@
 				<form:input path="name" htmlEscape="false" maxlength="100" class="input-xlarge required"/>
 				<span class="help-inline"><font color="red">*</font> </span>
 			</div>
-
 		</div>
 		<div class="control-group">
 			<label class="control-label">规格：</label>

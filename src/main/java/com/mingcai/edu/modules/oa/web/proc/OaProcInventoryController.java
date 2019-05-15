@@ -85,9 +85,9 @@ public class OaProcInventoryController extends BaseController {
 	/*
 	* 保存采购清单信息
 	* */
-	@ResponseBody
 	@RequiresPermissions("oa:proc:oaProcInventory:edit")
 	@RequestMapping(value = "save",method = RequestMethod.POST)
+	@ResponseBody
 	public String save(OaProcInventory oaProcInventory, Model model) {
 		if (!beanValidator(model, oaProcInventory)){
 			return form(oaProcInventory, model);

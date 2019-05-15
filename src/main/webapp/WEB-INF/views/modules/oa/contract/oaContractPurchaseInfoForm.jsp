@@ -185,7 +185,7 @@
                                     loading("信息输入有误!");
                                     closeLoading();
                                     return ;
-                                }
+                            }
                                 loading("生成完成!");
                                 closeLoading();
                                 document.getElementById('trem').contentWindow.location.reload(true);

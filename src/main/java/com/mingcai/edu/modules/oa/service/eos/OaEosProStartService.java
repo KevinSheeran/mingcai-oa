@@ -65,9 +65,6 @@ public class OaEosProStartService extends CrudService<OaEosProStartDao, OaEosPro
         page.setList(dao.findListByFlowFinishUser(oaEosProStart));
         return page;
     }
-    public List<OaEosProStart> findStartProgram(OaEosProStart oaEosProStart){
-        return startDao.findStartProgram(oaEosProStart);
-    }
 	public Page<OaEosProStart> findPage(Page<OaEosProStart> page, OaEosProStart oaEosProStart) {
 		return super.findPage(page, oaEosProStart);
 	}

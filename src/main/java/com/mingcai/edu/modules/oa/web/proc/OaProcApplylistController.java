@@ -7,9 +7,11 @@ import com.mingcai.edu.common.config.Global;
 import com.mingcai.edu.common.persistence.Page;
 import com.mingcai.edu.common.utils.StringUtils;
 import com.mingcai.edu.common.web.BaseController;
+import com.mingcai.edu.modules.oa.entity.eos.OaEosPro;
 import com.mingcai.edu.modules.oa.entity.eos.OaEosProStart;
 import com.mingcai.edu.modules.oa.entity.eos.OaEosProStartItem;
 import com.mingcai.edu.modules.oa.entity.proc.OaProcApplylist;
+import com.mingcai.edu.modules.oa.service.eos.OaEosProService;
 import com.mingcai.edu.modules.oa.service.eos.OaEosProStartItemService;
 import com.mingcai.edu.modules.oa.service.eos.OaEosProStartService;
 import com.mingcai.edu.modules.oa.service.proc.OaProcApplylistService;
@@ -39,7 +41,7 @@ public class OaProcApplylistController extends BaseController {
 	@Autowired
 	private OaProcApplylistService oaProcApplylistService;
 	@Autowired
-	private OaEosProStartService oaEosProStartService;
+	private OaEosProService oaEosProService;
 	@Autowired
 	private OaEosProStartItemService oaEosProStartItemService;
 	@ModelAttribute
@@ -70,8 +72,8 @@ public class OaProcApplylistController extends BaseController {
 	@RequestMapping(value = "form")
 	public String form(OaProcApplylist oaProcApplylist,Model model) {
 		model.addAttribute("oaProcApplylist", oaProcApplylist);
-		List<OaEosProStart> list=oaEosProStartService.findStartProgram(new OaEosProStart());
-		model.addAttribute("proStartlist", list);
+		List<OaEosPro> list=oaEosProService.findEosPro(new OaEosPro());
+		model.addAttribute("eosProlist", list);
 		OaEosProStartItem item=new OaEosProStartItem();
 		if(StringUtils.isNotEmpty(oaProcApplylist.getProId())){
 			item.setEosId(oaProcApplylist.getProId());
